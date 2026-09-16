@@ -142,9 +142,15 @@ function App() {
 
   useEffect(() => {
     if (!supabase || sessionStorage.getItem('marlon-visit-recorded')) return;
-    sessionStorage.setItem('marlon-visit-recorded', '1');
     supabase.rpc('record_site_visit').then(({ data, error }) => {
-      if (!error && data !== null) setVisitorCount(data);
+      if (error) {
+        console.error('Visitor counter error:', error);
+        return;
+      }
+      if (data !== null) {
+        setVisitorCount(data);
+        sessionStorage.setItem('marlon-visit-recorded', '1');
+      }
     });
   }, []);
 
