@@ -110,6 +110,7 @@ function App() {
   const [data, setData] = useState(demo);
   const [open, setOpen] = useState(false);
   const [connected, setConnected] = useState(false);
+  const [visitorCount, setVisitorCount] = useState(null);
   const [lightbox, setLightbox] = useState(null); // { title, images, index }
 
   useEffect(() => {
@@ -137,6 +138,14 @@ function App() {
       });
     }
     load();
+  }, []);
+
+  useEffect(() => {
+    if (!supabase || sessionStorage.getItem('marlon-visit-recorded')) return;
+    sessionStorage.setItem('marlon-visit-recorded', '1');
+    supabase.rpc('record_site_visit').then(({ data, error }) => {
+      if (!error && data !== null) setVisitorCount(data);
+    });
   }, []);
 
   // Reveal-on-scroll for anything tagged with the `.reveal` class
@@ -174,7 +183,7 @@ function App() {
           <b>MARLON_DB</b>
           <button onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}>{theme === 'dark' ? <Sun /> : <Moon />}</button>
         </header>
-        <Home data={data} openLightbox={openLightbox} />
+        <Home data={data} openLightbox={openLightbox} visitorCount={visitorCount} />
       </main>
       <Lightbox state={lightbox} onClose={closeLightbox} onNav={navLightbox} />
     </div>
@@ -232,7 +241,7 @@ function Sidebar({ open, close, theme, toggle, connected }) {
 /*  Home page content                                                  */
 /* ------------------------------------------------------------------ */
 
-function Home({ data, openLightbox }) {
+function Home({ data, openLightbox, visitorCount }) {
   const p = data.profile;
   return (
     <>
@@ -266,7 +275,7 @@ function Home({ data, openLightbox }) {
           <Stat v={String(data.projects.length).padStart(2, '0')} l="PROJECTS" />
           <Stat v="4+" l="YEARS EXPERIENCE" />
           <Stat v="WEB + MOBILE" l="DEVELOPMENT" />
-          <Stat v="PHP / REACT" l="CORE STACK" />
+          <Stat v={visitorCount === null ? '—' : visitorCount.toLocaleString()} l="TOTAL VISITS" />
         </div>
         <div className="systemStrip">
           <div><span>STACK.INDEX</span><b>HTML · CSS · JavaScript · PHP · MySQL · React Native</b></div>
