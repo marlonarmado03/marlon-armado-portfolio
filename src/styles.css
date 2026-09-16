@@ -63,7 +63,9 @@ img{max-width:100%;display:block}
 .photo small{font-size:9px;color:var(--faint);margin-top:5px}
 .photo>b{position:absolute;right:0;bottom:0;background:var(--text);color:var(--bg);font:9px ui-monospace;padding:5px 7px;z-index:3}
 .profileImage{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.08);opacity:1;z-index:0}
+:root[data-theme=light] .profileImage{filter:grayscale(.25) contrast(.96) brightness(1.18);}
 .photo .scanlines{position:absolute;inset:0;z-index:1;background:repeating-linear-gradient(0deg,transparent,transparent 4px,rgba(255,255,255,.025) 5px);pointer-events:none}
+:root[data-theme=light] .photo .scanlines{background:repeating-linear-gradient(0deg,transparent,transparent 4px,rgba(0,0,0,.035) 5px)}
 .record{display:flex;justify-content:space-between;max-width:390px;border-bottom:1px solid var(--line);padding-bottom:9px;margin-bottom:20px;font:10px ui-monospace;color:var(--faint)}
 .record b{font-weight:400;color:var(--muted)}
 h1{font:500 clamp(42px,6vw,76px)/.95 ui-monospace;margin:0 0 18px;letter-spacing:-.07em}
