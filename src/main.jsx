@@ -110,10 +110,7 @@ function App() {
   const [data, setData] = useState(demo);
   const [open, setOpen] = useState(false);
   const [connected, setConnected] = useState(false);
-  const [visitorCount, setVisitorCount] = useState(() => {
-    const saved = sessionStorage.getItem('marlon-visitor-count');
-    return saved ? Number(saved) : null;
-  });
+  const [visitorCount, setVisitorCount] = useState(null);
   const [lightbox, setLightbox] = useState(null); // { title, images, index }
 
   useEffect(() => {
@@ -144,7 +141,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!supabase || sessionStorage.getItem('marlon-visit-recorded')) return;
+    if (!supabase) return;
     supabase.rpc('record_site_visit').then(({ data, error }) => {
       if (error) {
         console.error('Visitor counter error:', error);
@@ -152,8 +149,6 @@ function App() {
       }
       if (data !== null) {
         setVisitorCount(data);
-        sessionStorage.setItem('marlon-visitor-count', String(data));
-        sessionStorage.setItem('marlon-visit-recorded', '1');
       }
     });
   }, []);
