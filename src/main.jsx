@@ -110,7 +110,10 @@ function App() {
   const [data, setData] = useState(demo);
   const [open, setOpen] = useState(false);
   const [connected, setConnected] = useState(false);
-  const [visitorCount, setVisitorCount] = useState(null);
+  const [visitorCount, setVisitorCount] = useState(() => {
+    const saved = sessionStorage.getItem('marlon-visitor-count');
+    return saved ? Number(saved) : null;
+  });
   const [lightbox, setLightbox] = useState(null); // { title, images, index }
 
   useEffect(() => {
@@ -149,6 +152,7 @@ function App() {
       }
       if (data !== null) {
         setVisitorCount(data);
+        sessionStorage.setItem('marlon-visitor-count', String(data));
         sessionStorage.setItem('marlon-visit-recorded', '1');
       }
     });
