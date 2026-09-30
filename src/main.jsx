@@ -418,18 +418,26 @@ function GithubActivity() {
 }
 
 function ProjectCard({ project: x, index: i, openLightbox }) {
+  const [selectedImage, setSelectedImage] = useState(0);
   const images = x.images && x.images.length ? x.images : (x.image_url ? [{ src: x.image_url, caption: '' }] : []);
-  const cover = images[0];
-  const extraThumbs = images.slice(1, 4);
-  const remaining = images.length - 1 - extraThumbs.length;
+  const cover = images[selectedImage];
 
   return (
     <article className="projectCard reveal">
       {cover ? (
-        <button className="coverBtn" onClick={() => openLightbox(x.title, images, 0)} aria-label={`View screenshots for ${x.title}`}>
-          <img src={cover.src} alt={cover.caption || x.title} />
-          <span className="expand"><Expand /> {images.length > 1 ? `${images.length} screenshots` : 'view full size'}</span>
-        </button>
+        <div className="projectGallery">
+          <button className="coverBtn" onClick={() => openLightbox(x.title, images, selectedImage)} aria-label={`View ${cover.caption || x.title} full size`}>
+            <img src={cover.src} alt={cover.caption || x.title} />
+            <span className="expand"><Expand /> {images.length > 1 ? 'open gallery' : 'view full size'}</span>
+          </button>
+          {images.length > 1 && (
+            <div className="galleryControls" aria-label={`${x.title} image navigation`}>
+              <button onClick={() => setSelectedImage((selectedImage - 1 + images.length) % images.length)} aria-label="Show previous image"><ChevronLeft /></button>
+              <span>{String(selectedImage + 1).padStart(2, '0')} <i>/</i> {String(images.length).padStart(2, '0')}</span>
+              <button onClick={() => setSelectedImage((selectedImage + 1) % images.length)} aria-label="Show next image"><ChevronRight /></button>
+            </div>
+          )}
+        </div>
       ) : x.demo_url ? (
         <a className="coverBtn projectPreview" href={x.demo_url} target="_blank" rel="noreferrer" aria-label={`Open ${x.title} website`}>
           <iframe src={x.demo_url} title={`${x.title} live preview`} loading="lazy" tabIndex={-1} />
@@ -448,20 +456,13 @@ function ProjectCard({ project: x, index: i, openLightbox }) {
         </div>
         {x.demo_url && <a href={x.demo_url} target="_blank" rel="noreferrer" className="projectLink">Visit site <ArrowUpRight /></a>}
         {images.length > 1 && (
-          <div className="thumbRow">
-            {extraThumbs.map((img, idx) => (
-              <button key={img.src} className="thumbBtn" onClick={() => openLightbox(x.title, images, idx + 1)} aria-label={`Screenshot ${idx + 2} of ${x.title}`}>
+          <div className="thumbRow" aria-label={`Choose an image for ${x.title}`}>
+            {images.map((img, idx) => (
+              <button key={img.src} className={`thumbBtn${selectedImage === idx ? ' selected' : ''}`} onClick={() => setSelectedImage(idx)} aria-label={`Show image ${idx + 1}: ${img.caption || x.title}`} aria-pressed={selectedImage === idx}>
                 <img src={img.src} alt="" />
+                <span>{String(idx + 1).padStart(2, '0')}</span>
               </button>
             ))}
-            {remaining > 0 && (
-              <button className="thumbBtn thumbMore" onClick={() => openLightbox(x.title, images, 4)} aria-label="View more screenshots">
-                +{remaining}
-              </button>
-            )}
-            <button className="thumbBtn thumbMore" onClick={() => openLightbox(x.title, images, 0)} aria-label="Open gallery">
-              <ArrowUpRight />
-            </button>
           </div>
         )}
       </div>

@@ -220,6 +220,22 @@ h1{font:500 clamp(42px,6vw,76px)/.95 ui-monospace;margin:0 0 18px;letter-spacing
 .projectBody{gap:15px}
 .stack small{border-radius:2px}
 .section{scroll-margin-top:20px}
+.projectGallery{position:relative;overflow:hidden;border-bottom:1px solid var(--line);background:var(--panel2)}
+.projectGallery .coverBtn{border-bottom:0}
+.galleryControls{position:absolute;left:12px;bottom:12px;z-index:2;display:flex;align-items:center;gap:8px;padding:4px;background:rgba(9,9,11,.82);border:1px solid rgba(255,255,255,.18);color:#fff;backdrop-filter:blur(6px)}
+.galleryControls button{display:grid;place-items:center;width:28px;height:28px;padding:0;border:0;background:transparent;color:inherit;cursor:pointer}
+.galleryControls button:hover{background:rgba(255,255,255,.15)}
+.galleryControls svg{width:16px;height:16px}
+.galleryControls span{font:10px ui-monospace;white-space:nowrap}
+.galleryControls span i{color:#92929a;font-style:normal;padding:0 3px}
+.thumbRow{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--faint) var(--panel2);padding:7px 2px 9px;gap:8px}
+.thumbBtn{width:68px;height:48px;flex:0 0 auto;border-radius:2px}
+.thumbBtn img{filter:grayscale(.3)}
+.thumbBtn.selected{border-color:var(--good);box-shadow:0 0 0 1px var(--good)}
+.thumbBtn.selected img,.thumbBtn:hover img{filter:none}
+.thumbBtn span{position:absolute;right:3px;bottom:3px;padding:2px 4px;background:rgba(9,9,11,.78);color:#fff;font:8px ui-monospace}
+.thumbRow::-webkit-scrollbar{height:5px}
+.thumbRow::-webkit-scrollbar-thumb{background:var(--faint)}
 @media(max-width:700px){
   .heroActions a{flex:1}
   .stats>div:nth-child(2){border-right:0}
