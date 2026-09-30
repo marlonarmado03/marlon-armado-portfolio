@@ -79,6 +79,7 @@ const demo = {
       status: 'LIVE',
       featured: true,
       demo_url: 'https://jr-construction-lemon.vercel.app/',
+      images: [{ src: 'https://image.thum.io/get/width/1200/crop/800/https://jr-construction-lemon.vercel.app/', caption: 'Live website preview' }],
     },
   ],
 
@@ -140,7 +141,9 @@ function App() {
       if (rs.every((r) => !r.error)) setConnected(true);
       setData({
         profile: rs[0].data || demo.profile,
-        projects: rs[1].data?.length ? rs[1].data : demo.projects,
+        projects: rs[1].data?.length
+          ? [...demo.projects.filter((project) => !rs[1].data.some((saved) => saved.title === project.title)), ...rs[1].data]
+          : demo.projects,
         skills: rs[2].data?.length ? rs[2].data : demo.skills,
         experience: rs[3].data?.length ? rs[3].data : demo.experience,
         services: rs[4].data?.length ? rs[4].data : demo.services,
@@ -278,6 +281,10 @@ function Home({ data, openLightbox, visitorCount }) {
               <a href={p.linkedin_url}><Globe2 /> linkedin ↗</a>
               <a href="#contact"><Mail /> contact ↗</a>
             </div>
+            <div className="heroActions">
+              <a className="primaryAction" href="#projects">Explore my work <ArrowUpRight /></a>
+              <a className="secondaryAction" href="#contact">Let’s talk <Mail /></a>
+            </div>
             <div className="heroMeta">
               <div><span>LOCATION</span><b>{p.location}</b></div>
               <div><span>STATUS</span><b className="available"><i /> {p.availability}</b></div>
@@ -390,7 +397,7 @@ function GithubActivity() {
   return (
     <section id="github" className="section githubSection">
       <div className="title">
-        <div><span>07 —</span><h2>github</h2></div>
+        <div><span>04 —</span><h2>github</h2></div>
         <code>@MARLONARMADO03 <ArrowUpRight /></code>
       </div>
       <a className="githubGraph reveal" href="https://github.com/marlonarmado03" target="_blank" rel="noreferrer" aria-label="Open Marlon Armado's GitHub profile">
@@ -418,12 +425,17 @@ function ProjectCard({ project: x, index: i, openLightbox }) {
 
   return (
     <article className="projectCard reveal">
-      {cover && (
+      {cover ? (
         <button className="coverBtn" onClick={() => openLightbox(x.title, images, 0)} aria-label={`View screenshots for ${x.title}`}>
           <img src={cover.src} alt={cover.caption || x.title} />
           <span className="expand"><Expand /> {images.length > 1 ? `${images.length} screenshots` : 'view full size'}</span>
         </button>
-      )}
+      ) : x.demo_url ? (
+        <a className="coverBtn projectPreview" href={x.demo_url} target="_blank" rel="noreferrer" aria-label={`Open ${x.title} website`}>
+          <iframe src={x.demo_url} title={`${x.title} live preview`} loading="lazy" tabIndex={-1} />
+          <span className="expand"><ArrowUpRight /> open live site</span>
+        </a>
+      ) : null}
       <div className="projectBody">
         <div className="rowTop">
           <span className="idTag">{String(i + 1).padStart(3, '0')}</span>
@@ -542,7 +554,7 @@ function Contact({ email }) {
   return (
     <section id="contact" className="section">
       <div className="title">
-        <div><span>06 —</span><h2>contact</h2></div>
+        <div><span>07 —</span><h2>contact</h2></div>
         <code>INSERT INTO inquiries;</code>
       </div>
       <div className="contact">

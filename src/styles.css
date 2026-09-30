@@ -125,6 +125,8 @@ h1{font:500 clamp(42px,6vw,76px)/.95 ui-monospace;margin:0 0 18px;letter-spacing
 .projectCard:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--faint)}
 .coverBtn{border:0;padding:0;margin:0;cursor:pointer;display:block;width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;background:var(--panel2);border-bottom:1px solid var(--line)}
 .coverBtn img{width:100%;height:100%;object-fit:cover;filter:grayscale(.55) contrast(1.05);transition:filter .25s ease,transform .3s ease;opacity:.92}
+.projectPreview{color:inherit;text-decoration:none}
+.projectPreview iframe{width:100%;height:100%;border:0;pointer-events:none;background:var(--panel2)}
 .coverBtn:hover img{filter:grayscale(0) contrast(1.02);transform:scale(1.035);opacity:1}
 .coverBtn .expand{position:absolute;right:10px;bottom:10px;display:flex;align-items:center;gap:5px;background:rgba(9,9,11,.72);color:#fff;font:9.5px ui-monospace;padding:5px 8px;border:1px solid rgba(255,255,255,.25);opacity:0;transform:translateY(4px);transition:opacity .2s,transform .2s}
 .coverBtn:hover .expand{opacity:1;transform:none}
@@ -200,6 +202,30 @@ h1{font:500 clamp(42px,6vw,76px)/.95 ui-monospace;margin:0 0 18px;letter-spacing
 .success{color:var(--good);font:10.5px ui-monospace}
 
 .foot{max-width:1120px;margin:auto;padding:30px 58px;color:var(--faint);font:9.5px ui-monospace;display:flex;justify-content:space-between}
+.hero{background:radial-gradient(ellipse at 82% 35%,color-mix(in srgb,var(--good) 7%,transparent),transparent 48%)}
+.heroActions{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 18px}
+.heroActions a{min-height:44px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:9px;font:11px ui-monospace;transition:transform .18s,background .18s,border-color .18s}
+.heroActions a:hover{transform:translateY(-2px)}
+.heroActions svg{width:15px;height:15px}
+.primaryAction{background:var(--good);border:1px solid var(--good);color:#101813}
+.primaryAction:hover{background:#9ae6b2;border-color:#9ae6b2}
+.secondaryAction{border:1px solid var(--line);background:var(--panel);color:var(--text)}
+.secondaryAction:hover{border-color:var(--good)}
+.title h2{letter-spacing:-.055em}
+.projectCard{border-radius:5px;overflow:hidden}
+.projectCard:hover{border-color:color-mix(in srgb,var(--good) 42%,var(--line))}
+.coverBtn img{filter:grayscale(.32) contrast(1.03);transition:filter .25s ease,transform .4s ease}
+.projectCard:hover .coverBtn img{filter:grayscale(0) contrast(1.02);transform:scale(1.025)}
+.coverBtn .expand{border-radius:3px}
+.projectBody{gap:15px}
+.stack small{border-radius:2px}
+.section{scroll-margin-top:20px}
+@media(max-width:700px){
+  .heroActions a{flex:1}
+  .stats>div:nth-child(2){border-right:0}
+  .stats>div:nth-child(3),.stats>div:nth-child(4){border-bottom:0}
+  .projectBody{padding:18px}
+}
 .githubSection{padding-top:75px;padding-bottom:75px}
 .githubSection .title{margin-bottom:28px}
 .githubSection .title h2{font-size:19px;font-weight:400;color:var(--muted);letter-spacing:0}
