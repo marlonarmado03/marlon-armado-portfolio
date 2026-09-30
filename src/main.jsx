@@ -71,6 +71,15 @@ const demo = {
         { src: '/gallery/brgy/pic5.jpg', caption: 'Sign-in page, City of Dasmariñas, Cavite' },
       ],
     },
+    {
+      id: 4,
+      title: 'J & R Constructions',
+      description: 'A website for J & R Constructions, showcasing the company and its construction services.',
+      technologies: ['Website'],
+      status: 'LIVE',
+      featured: true,
+      demo_url: 'https://jr-construction-lemon.vercel.app/',
+    },
   ],
 
   skills: [
@@ -425,6 +434,7 @@ function ProjectCard({ project: x, index: i, openLightbox }) {
         <div className="stack">
           {(x.technologies || []).map((t) => <small key={t}>{t}</small>)}
         </div>
+        {x.demo_url && <a href={x.demo_url} target="_blank" rel="noreferrer" className="projectLink">Visit site <ArrowUpRight /></a>}
         {images.length > 1 && (
           <div className="thumbRow">
             {extraThumbs.map((img, idx) => (
