@@ -222,13 +222,13 @@ h1{font:500 clamp(42px,6vw,76px)/.95 ui-monospace;margin:0 0 18px;letter-spacing
 .section{scroll-margin-top:20px}
 .projectGallery{position:relative;overflow:hidden;border-bottom:1px solid var(--line);background:var(--panel2)}
 .projectGallery .coverBtn{border-bottom:0}
-.galleryControls{position:absolute;left:12px;bottom:12px;z-index:2;display:flex;align-items:center;gap:8px;padding:4px;background:rgba(9,9,11,.82);border:1px solid rgba(255,255,255,.18);color:#fff;backdrop-filter:blur(6px)}
+.galleryControls{position:static;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 12px;background:var(--panel);border-top:1px solid var(--line);color:var(--text)}
 .galleryControls button{display:grid;place-items:center;width:28px;height:28px;padding:0;border:0;background:transparent;color:inherit;cursor:pointer}
 .galleryControls button:hover{background:rgba(255,255,255,.15)}
 .galleryControls svg{width:16px;height:16px}
 .galleryControls span{font:10px ui-monospace;white-space:nowrap}
-.galleryControls span i{color:#92929a;font-style:normal;padding:0 3px}
-.thumbRow{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--faint) var(--panel2);padding:7px 2px 9px;gap:8px}
+.galleryControls span i{color:var(--faint);font-style:normal;padding:0 4px}
+.thumbRow{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--faint) var(--panel2);padding:8px 10px 11px;gap:8px;margin:0;background:var(--panel)}
 .thumbBtn{width:68px;height:48px;flex:0 0 auto;border-radius:2px}
 .thumbBtn img{filter:grayscale(.3)}
 .thumbBtn.selected{border-color:var(--good);box-shadow:0 0 0 1px var(--good)}
@@ -241,6 +241,73 @@ h1{font:500 clamp(42px,6vw,76px)/.95 ui-monospace;margin:0 0 18px;letter-spacing
   .stats>div:nth-child(2){border-right:0}
   .stats>div:nth-child(3),.stats>div:nth-child(4){border-bottom:0}
   .projectBody{padding:18px}
+}
+
+/* ---------- visual polish ---------- */
+:root{--good:#8bffb0;--glow:rgba(94,255,155,.13)}
+:root[data-theme=light]{--good:#147d4b;--glow:rgba(31,145,90,.09)}
+html{scroll-padding-top:24px}
+body{background-image:radial-gradient(ellipse at 78% 8%,var(--glow),transparent 34%)}
+.app aside{backdrop-filter:blur(18px);background:color-mix(in srgb,var(--bg) 90%,transparent)}
+.mark{border-radius:9px;border-color:color-mix(in srgb,var(--good) 40%,var(--line));color:var(--good);box-shadow:0 0 24px var(--glow)}
+.app nav a{border-radius:6px}
+.app nav a:hover{border-color:color-mix(in srgb,var(--good) 28%,var(--line))}
+.app nav a:hover svg{color:var(--good)}
+.hero{position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 84% 32%,var(--glow),transparent 42%)}
+.hero:after{content:'</>';position:absolute;z-index:-1;right:4%;top:15%;color:color-mix(in srgb,var(--good) 5%,transparent);font:700 clamp(150px,26vw,330px)/1 ui-monospace;letter-spacing:-.12em;pointer-events:none}
+.eyebrow{display:flex;align-items:center;letter-spacing:.16em}
+.eyebrow i{box-shadow:0 0 0 5px color-mix(in srgb,var(--good) 12%,transparent),0 0 18px var(--good)}
+h1{background:linear-gradient(105deg,var(--text) 48%,var(--good));-webkit-background-clip:text;background-clip:text;color:transparent}
+.photo>div{border-radius:10px;border-color:color-mix(in srgb,var(--good) 24%,var(--line));box-shadow:0 25px 70px -30px var(--glow),var(--shadow)}
+.photo>div:before{inset:12px;border-radius:5px;border-color:color-mix(in srgb,var(--good) 28%,transparent)}
+.profileImage{filter:grayscale(.35) contrast(1.06) saturate(.9)}
+:root[data-theme=light] .profileImage{filter:grayscale(.12) contrast(.96) brightness(1.05)}
+.stats{border:1px solid var(--line);border-radius:8px;background:color-mix(in srgb,var(--panel) 75%,transparent);overflow:hidden}
+.stats>div{transition:background .2s ease}
+.stats>div:hover{background:var(--panel2)}
+.stats b{letter-spacing:-.06em}
+.stats small{letter-spacing:.11em}
+.title{position:relative;padding-bottom:15px;border-bottom:1px solid var(--line)}
+.title:after{content:'';position:absolute;bottom:-1px;left:0;width:54px;height:2px;background:var(--good)}
+.title h2{text-transform:capitalize}
+.card,.focusGrid,.systemStrip,.projectCard,.services{border-radius:8px;overflow:hidden}
+.card{box-shadow:0 12px 36px -30px var(--text)}
+.projectCard{box-shadow:0 14px 40px -34px var(--text)}
+.projectCard:hover{transform:translateY(-6px);box-shadow:0 26px 60px -34px var(--glow),var(--shadow)}
+.projectGallery .coverBtn img{transition:transform .5s cubic-bezier(.2,.75,.25,1),filter .35s}
+.galleryControls{background:linear-gradient(90deg,var(--panel),var(--panel2),var(--panel))}
+.galleryControls button{border-radius:5px;color:var(--good)}
+.thumbBtn{border-radius:5px}
+.thumbBtn.selected{box-shadow:0 0 0 1px var(--good),0 0 18px var(--glow)}
+.skill>i{height:6px;border-radius:99px;background:var(--line);box-shadow:inset 0 1px 2px #0003}
+.skill>i em{border-radius:inherit;background:linear-gradient(90deg,var(--good),color-mix(in srgb,var(--good) 40%,#4f9dff));box-shadow:0 0 14px var(--glow)}
+.timeline article{position:relative;transition:background .2s ease}
+.timeline article:hover{background:color-mix(in srgb,var(--panel) 70%,transparent)}
+.timeline article>span{color:var(--good)}
+.services article{transition:background .2s,transform .2s}
+.services article:hover{transform:translateY(-3px);background:var(--panel2)}
+.services article:hover svg{color:var(--good);filter:drop-shadow(0 0 9px var(--glow))}
+.contact input,.contact textarea{border-radius:6px}
+.contact input:focus,.contact textarea:focus{border-color:var(--good);box-shadow:0 0 0 3px var(--glow)}
+.contact button{border-radius:6px;background:var(--good);border-color:var(--good);color:#101813;font-weight:600}
+.githubGraph{border:1px solid var(--line);border-radius:8px;padding:20px;background:linear-gradient(135deg,var(--panel),color-mix(in srgb,var(--good) 4%,var(--panel)));overflow:hidden}
+.contributionGrid i[data-level="1"]{background:color-mix(in srgb,var(--good) 25%,var(--line))}
+.contributionGrid i[data-level="2"]{background:color-mix(in srgb,var(--good) 48%,var(--line))}
+.contributionGrid i[data-level="3"]{background:color-mix(in srgb,var(--good) 72%,var(--line))}
+.contributionGrid i[data-level="4"]{background:var(--good)}
+.githubGraphBottom>div{color:var(--good)}
+.lightbox{background:rgba(4,8,6,.94)}
+.foot{border-top:1px solid var(--line)}
+::selection{background:var(--good);color:#101813}
+@media(max-width:700px){
+  .hero:after{top:7%;right:-3%;font-size:140px}
+  .hero{background-position:center top}
+  .stats{margin-top:45px}
+  .stats>div{padding:19px 14px}
+  .githubGraph{padding:14px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}
 }
 .githubSection{padding-top:75px;padding-bottom:75px}
 .githubSection .title{margin-bottom:28px}

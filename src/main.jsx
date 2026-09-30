@@ -111,6 +111,23 @@ const demo = {
   ],
 };
 
+function normalizeGallery(images) {
+  if (!images) return null;
+  let gallery = images;
+  if (typeof gallery === 'string') {
+    try {
+      gallery = JSON.parse(gallery);
+    } catch {
+      gallery = [gallery];
+    }
+  }
+  if (!Array.isArray(gallery)) return null;
+  const normalized = gallery
+    .map((image) => typeof image === 'string' ? { src: image, caption: '' } : image)
+    .filter((image) => image && image.src);
+  return normalized.length ? normalized : null;
+}
+
 /* ------------------------------------------------------------------ */
 /*  App shell                                                          */
 /* ------------------------------------------------------------------ */
@@ -139,11 +156,17 @@ function App() {
         supabase.from('services').select('*').order('sort_order'),
       ]);
       if (rs.every((r) => !r.error)) setConnected(true);
+      const savedProjects = rs[1].data || [];
+      const projects = [
+        ...demo.projects.map((project) => {
+          const saved = savedProjects.find((item) => item.title === project.title);
+          return saved ? { ...project, ...saved, images: normalizeGallery(saved.images) || project.images } : project;
+        }),
+        ...savedProjects.filter((saved) => !demo.projects.some((project) => project.title === saved.title)),
+      ];
       setData({
         profile: rs[0].data || demo.profile,
-        projects: rs[1].data?.length
-          ? [...demo.projects.filter((project) => !rs[1].data.some((saved) => saved.title === project.title)), ...rs[1].data]
-          : demo.projects,
+        projects,
         skills: rs[2].data?.length ? rs[2].data : demo.skills,
         experience: rs[3].data?.length ? rs[3].data : demo.experience,
         services: rs[4].data?.length ? rs[4].data : demo.services,
@@ -419,7 +442,7 @@ function GithubActivity() {
 
 function ProjectCard({ project: x, index: i, openLightbox }) {
   const [selectedImage, setSelectedImage] = useState(0);
-  const images = x.images && x.images.length ? x.images : (x.image_url ? [{ src: x.image_url, caption: '' }] : []);
+  const images = normalizeGallery(x.images) || (x.image_url ? [{ src: x.image_url, caption: '' }] : []);
   const cover = images[selectedImage];
 
   return (
@@ -433,8 +456,18 @@ function ProjectCard({ project: x, index: i, openLightbox }) {
           {images.length > 1 && (
             <div className="galleryControls" aria-label={`${x.title} image navigation`}>
               <button onClick={() => setSelectedImage((selectedImage - 1 + images.length) % images.length)} aria-label="Show previous image"><ChevronLeft /></button>
-              <span>{String(selectedImage + 1).padStart(2, '0')} <i>/</i> {String(images.length).padStart(2, '0')}</span>
+              <span>IMAGE {String(selectedImage + 1).padStart(2, '0')} <i>/</i> {String(images.length).padStart(2, '0')}</span>
               <button onClick={() => setSelectedImage((selectedImage + 1) % images.length)} aria-label="Show next image"><ChevronRight /></button>
+            </div>
+          )}
+          {images.length > 1 && (
+            <div className="thumbRow" aria-label={`Choose an image for ${x.title}`}>
+              {images.map((img, idx) => (
+                <button key={img.src} className={`thumbBtn${selectedImage === idx ? ' selected' : ''}`} onClick={() => setSelectedImage(idx)} aria-label={`Show image ${idx + 1}: ${img.caption || x.title}`} aria-pressed={selectedImage === idx}>
+                  <img src={img.src} alt="" />
+                  <span>{String(idx + 1).padStart(2, '0')}</span>
+                </button>
+              ))}
             </div>
           )}
         </div>
@@ -455,16 +488,6 @@ function ProjectCard({ project: x, index: i, openLightbox }) {
           {(x.technologies || []).map((t) => <small key={t}>{t}</small>)}
         </div>
         {x.demo_url && <a href={x.demo_url} target="_blank" rel="noreferrer" className="projectLink">Visit site <ArrowUpRight /></a>}
-        {images.length > 1 && (
-          <div className="thumbRow" aria-label={`Choose an image for ${x.title}`}>
-            {images.map((img, idx) => (
-              <button key={img.src} className={`thumbBtn${selectedImage === idx ? ' selected' : ''}`} onClick={() => setSelectedImage(idx)} aria-label={`Show image ${idx + 1}: ${img.caption || x.title}`} aria-pressed={selectedImage === idx}>
-                <img src={img.src} alt="" />
-                <span>{String(idx + 1).padStart(2, '0')}</span>
-              </button>
-            ))}
-          </div>
-        )}
       </div>
     </article>
   );
