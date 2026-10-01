@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+﻿import React, { useEffect, useState, useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 import {
   Activity, ArrowUpRight, BriefcaseBusiness, Check, ChevronLeft, ChevronRight,
@@ -20,7 +20,7 @@ const demo = {
     bio: 'I am a Web and Mobile Developer with experience building responsive websites and cross-platform mobile applications. I specialize in turning ideas into functional, user-friendly digital solutions. I enjoy solving problems, writing clean code, and continuously learning to improve performance and user experience.',
     location: 'Philippines',
     availability: 'Available for freelance and full-time work',
-    email: 'your-email@example.com',
+    email: 'marlonvargasarmado@gmail.com',
     github_url: 'https://github.com/marlonarmado03',
     linkedin_url: '#',
   },
@@ -165,6 +165,7 @@ function App() {
   const [visitorCount, setVisitorCount] = useState(null);
   const [lightbox, setLightbox] = useState(null); // { title, images, index }
   const progressRef = useRef(null);
+  const closeSidebar = useCallback(() => setOpen(false), []);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -173,6 +174,10 @@ function App() {
 
   useEffect(() => {
     let cancelled = false;
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      setReadyPortraitTheme('static');
+      return () => { cancelled = true; };
+    }
     const images = Object.values({ ...darkPortraits, ...lightPortraits }).map((src) => {
       const image = new window.Image();
       image.decoding = 'async';
@@ -323,13 +328,16 @@ function App() {
 
   return (
     <div className="app">
+      <a className="skipLink" href="#main-content">Skip to main content</a>
       <div ref={progressRef} className="scrollProgress" aria-hidden="true" />
-      <Sidebar open={open} close={() => setOpen(false)} theme={theme} toggle={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))} connected={connected} activeSection={activeSection} onSelect={setActiveSection} />
-      <main>
+      <Sidebar open={open} close={closeSidebar} theme={theme} toggle={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))} connected={connected} activeSection={activeSection} onSelect={setActiveSection} />
+      <main id="main-content" tabIndex={-1} aria-hidden={open} inert={open ? true : undefined}>
         <header className="mobile">
-          <button onClick={() => setOpen(true)}><Menu /></button>
+          <button onClick={() => setOpen(true)} aria-label="Open navigation menu" aria-expanded={open} aria-controls="primary-navigation"><Menu /></button>
           <b>MARLON_DB</b>
-          <button onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}>{theme === 'dark' ? <Sun /> : <Moon />}</button>
+          <button onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+            {theme === 'dark' ? <Sun /> : <Moon />}
+          </button>
         </header>
         <Home data={data} theme={theme} lookDirection={lookDirection} readyPortraitTheme={readyPortraitTheme} openLightbox={openLightbox} visitorCount={visitorCount} />
       </main>
@@ -343,6 +351,15 @@ function App() {
 /* ------------------------------------------------------------------ */
 
 function Sidebar({ open, close, theme, toggle, connected, activeSection, onSelect }) {
+  const sidebarRef = useRef(null);
+  const [mobileViewport, setMobileViewport] = useState(() => window.matchMedia('(max-width: 900px)').matches);
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 900px)');
+    const updateViewport = (event) => setMobileViewport(event.matches);
+    media.addEventListener('change', updateViewport);
+    return () => media.removeEventListener('change', updateViewport);
+  }, []);
   const nav = [
     ['Home', '#home', Terminal],
     ['About', '#about', Code2],
@@ -353,13 +370,43 @@ function Sidebar({ open, close, theme, toggle, connected, activeSection, onSelec
     ['Services', '#services', Server],
     ['Contact', '#contact', Mail],
   ];
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const sidebar = sidebarRef.current;
+    const previousFocus = document.activeElement;
+    const focusable = () => [...(sidebar?.querySelectorAll('a[href], button:not([disabled])') || [])];
+    focusable()[0]?.focus();
+    function onKeyDown(event) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        close();
+      }
+      if (event.key !== 'Tab') return;
+      const items = focusable();
+      if (!items.length) return;
+      if (event.shiftKey && document.activeElement === items[0]) {
+        event.preventDefault();
+        items[items.length - 1].focus();
+      } else if (!event.shiftKey && document.activeElement === items[items.length - 1]) {
+        event.preventDefault();
+        items[0].focus();
+      }
+    }
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      previousFocus?.focus?.();
+    };
+  }, [open, close]);
+
   return (
     <>
-      <aside className={open ? 'open' : ''}>
+      <aside id="primary-navigation" ref={sidebarRef} className={open ? 'open' : ''} aria-label="Primary navigation" aria-hidden={mobileViewport && !open} inert={mobileViewport && !open ? true : undefined} role={open ? 'dialog' : undefined} aria-modal={open ? 'true' : undefined}>
         <div className="brand">
           <div className="mark"><Database /></div>
           <div><b>MARLON_DB</b><small>portfolio.system</small></div>
-          <button className="x" onClick={close}><X /></button>
+          <button className="x" onClick={close} aria-label="Close navigation menu"><X /></button>
         </div>
         <label>DATABASE</label>
         <nav>
@@ -374,7 +421,7 @@ function Sidebar({ open, close, theme, toggle, connected, activeSection, onSelec
           <i />
           <div><b>{connected ? 'DATABASE CONNECTED' : 'LOCAL PREVIEW'}</b><small>postgresql://portfolio</small></div>
         </div>
-        <button className="theme" onClick={toggle}>
+        <button className="theme" onClick={toggle} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} aria-pressed={theme === 'light'}>
           {theme === 'dark' ? <Moon /> : <Sun />}
           <span>{theme === 'dark' ? 'Dark mode' : 'Light mode'}</span>
         </button>
@@ -392,7 +439,7 @@ function Sidebar({ open, close, theme, toggle, connected, activeSection, onSelec
 function Home({ data, theme, lookDirection, readyPortraitTheme, openLightbox, visitorCount }) {
   const p = data.profile;
   const portraitSet = theme === 'light' ? lightPortraits : darkPortraits;
-  const neutralPortrait = theme === 'light' ? '/profile-light.png' : '/profile.png';
+  const neutralPortrait = theme === 'light' ? '/profile-light-800.jpg' : '/profile.png';
 
   return (
     <>
@@ -549,12 +596,27 @@ function PortfolioChatbot({ portfolio }) {
 
   useEffect(() => {
     if (!open) return undefined;
+    const previousFocus = document.activeElement;
     function closeOnEscape(event) {
       if (event.key === 'Escape') setOpen(false);
+      if (event.key !== 'Tab') return;
+      const panel = document.getElementById('portfolio-chat-panel');
+      const focusable = [...(panel?.querySelectorAll('button:not([disabled]), input:not([disabled])') || [])];
+      if (!focusable.length) return;
+      if (event.shiftKey && document.activeElement === focusable[0]) {
+        event.preventDefault();
+        focusable[focusable.length - 1].focus();
+      } else if (!event.shiftKey && document.activeElement === focusable[focusable.length - 1]) {
+        event.preventDefault();
+        focusable[0].focus();
+      }
     }
     window.addEventListener('keydown', closeOnEscape);
     input.current?.focus();
-    return () => window.removeEventListener('keydown', closeOnEscape);
+    return () => {
+      window.removeEventListener('keydown', closeOnEscape);
+      previousFocus?.focus?.();
+    };
   }, [open]);
 
   function sendQuestion(value = question) {
@@ -571,7 +633,7 @@ function PortfolioChatbot({ portfolio }) {
   return (
     <div className="portfolioChat">
       {open && (
-        <section id="portfolio-chat-panel" className="chatPanel" role="dialog" aria-label="Portfolio chatbot">
+        <section id="portfolio-chat-panel" className="chatPanel" role="dialog" aria-modal="true" aria-label="Portfolio chatbot">
           <header className="chatHeader">
             <div className="chatAvatar"><Database /></div>
             <div><b>Portfolio assistant</b><small><i /> Answers from this portfolio</small></div>
@@ -783,6 +845,16 @@ function getCalendarMonths(year) {
   }));
 }
 
+function getLocalGalleryVariant(src, variant) {
+  if (!src.startsWith('/gallery/')) return src;
+  return src.replace(/\.jpe?g$/i, `-${variant}.jpg`);
+}
+
+function getLocalGalleryImageSet(src) {
+  if (!src.startsWith('/gallery/') || !/\.jpe?g$/i.test(src)) return undefined;
+  return `${getLocalGalleryVariant(src, '800')} 800w, ${src} 1600w`;
+}
+
 function ProjectCard({ project: x, index: i, openLightbox }) {
   const [selectedImage, setSelectedImage] = useState(0);
   const images = normalizeGallery(x.images) || (x.image_url ? [{ src: x.image_url, caption: '' }] : []);
@@ -793,21 +865,21 @@ function ProjectCard({ project: x, index: i, openLightbox }) {
       {cover ? (
         <div className="projectGallery">
           <button className="coverBtn" onClick={() => openLightbox(x.title, images, selectedImage)} aria-label={`View ${cover.caption || x.title} full size`}>
-            <img src={cover.src} alt={cover.caption || x.title} loading="lazy" decoding="async" />
+            <img src={cover.src} srcSet={getLocalGalleryImageSet(cover.src)} sizes="(max-width: 700px) calc(100vw - 40px), (max-width: 900px) calc(100vw - 120px), (max-width: 1200px) calc(100vw - 310px), 520px" alt="" loading="lazy" decoding="async" />
             <span className="expand"><Expand /> {images.length > 1 ? 'open gallery' : 'view full size'}</span>
           </button>
           {images.length > 1 && (
-            <div className="galleryControls" aria-label={`${x.title} image navigation`}>
+            <div className="galleryControls" role="group" aria-label={`${x.title} image navigation`}>
               <button onClick={() => setSelectedImage((selectedImage - 1 + images.length) % images.length)} aria-label="Show previous image"><ChevronLeft /></button>
               <span>IMAGE {String(selectedImage + 1).padStart(2, '0')} <i>/</i> {String(images.length).padStart(2, '0')}</span>
               <button onClick={() => setSelectedImage((selectedImage + 1) % images.length)} aria-label="Show next image"><ChevronRight /></button>
             </div>
           )}
           {images.length > 1 && (
-            <div className="thumbRow" aria-label={`Choose an image for ${x.title}`}>
+            <div className="thumbRow" role="group" aria-label={`Choose an image for ${x.title}`}>
               {images.map((img, idx) => (
                 <button key={img.src} className={`thumbBtn${selectedImage === idx ? ' selected' : ''}`} onClick={() => setSelectedImage(idx)} aria-label={`Show image ${idx + 1}: ${img.caption || x.title}`} aria-pressed={selectedImage === idx}>
-                  <img src={img.src} alt="" loading="lazy" decoding="async" />
+                  <img src={getLocalGalleryVariant(img.src, 'thumb')} alt="" loading="lazy" decoding="async" />
                   <span>{String(idx + 1).padStart(2, '0')}</span>
                 </button>
               ))}
@@ -880,10 +952,25 @@ function getProjectHighlights(project) {
 function Lightbox({ state, onClose, onNav }) {
   useEffect(() => {
     if (!state) return;
+    const previousFocus = document.activeElement;
+    const dialog = document.querySelector('.lightbox');
+    const closeButton = dialog?.querySelector('.lbClose');
+    closeButton?.focus();
     function onKey(e) {
       if (e.key === 'Escape') onClose();
       if (e.key === 'ArrowRight') onNav(1);
       if (e.key === 'ArrowLeft') onNav(-1);
+      if (e.key === 'Tab') {
+        const focusable = [...(dialog?.querySelectorAll('button:not([disabled])') || [])];
+        if (!focusable.length) return;
+        if (e.shiftKey && document.activeElement === focusable[0]) {
+          e.preventDefault();
+          focusable[focusable.length - 1].focus();
+        } else if (!e.shiftKey && document.activeElement === focusable[focusable.length - 1]) {
+          e.preventDefault();
+          focusable[0].focus();
+        }
+      }
     }
     document.addEventListener('keydown', onKey);
     const prevOverflow = document.body.style.overflow;
@@ -891,8 +978,9 @@ function Lightbox({ state, onClose, onNav }) {
     return () => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = prevOverflow;
+      if (!document.querySelector('.lightbox')) previousFocus?.focus?.();
     };
-  }, [state, onClose, onNav]);
+  }, [Boolean(state), onClose, onNav]);
 
   if (!state) return null;
   const { title, images, index } = state;
@@ -904,7 +992,7 @@ function Lightbox({ state, onClose, onNav }) {
       <button className="lbClose" onClick={onClose} aria-label="Close"><X /></button>
       {multi && <button className="lbNav lbPrev" onClick={(e) => { e.stopPropagation(); onNav(-1); }} aria-label="Previous image"><ChevronLeft /></button>}
       <figure onClick={(e) => e.stopPropagation()}>
-        <img src={item.src} alt={item.caption || title} />
+        <img src={item.src} alt={item.caption || title} decoding="async" />
         <figcaption>
           <b>{title}</b>
           {item.caption && <span>{item.caption}</span>}

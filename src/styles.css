@@ -1,9 +1,9 @@
 :root{
-  --bg:#09090b;--panel:#0d0d10;--panel2:#111115;--text:#dedee3;--muted:#9a9aa4;--faint:#6b6b76;
+  --bg:#09090b;--panel:#0d0d10;--panel2:#111115;--text:#dedee3;--muted:#9a9aa4;--faint:#9898a1;
   --line:#25252b;--line2:#19191e;--accent:#f4f4f5;--good:#7bd89b;--shadow:0 18px 45px -20px rgba(0,0,0,.55);
 }
 :root[data-theme=light]{
-  --bg:#f6f6f3;--panel:#fff;--panel2:#f0f0ec;--text:#17171a;--muted:#55555d;--faint:#84848c;
+  --bg:#f6f6f3;--panel:#fff;--panel2:#f0f0ec;--text:#17171a;--muted:#55555d;--faint:#6b6b73;
   --line:#d8d8d2;--line2:#e8e8e3;--accent:#111114;--shadow:0 18px 40px -22px rgba(20,20,25,.18);
 }
 *{box-sizing:border-box}
@@ -14,6 +14,8 @@ button,input,textarea{font:inherit}
 img{max-width:100%;display:block}
 ::selection{background:var(--text);color:var(--bg)}
 :focus-visible{outline:2px solid var(--good);outline-offset:2px}
+.skipLink{position:fixed;z-index:120;top:12px;left:12px;padding:11px 14px;border:1px solid var(--good);border-radius:6px;background:var(--panel);color:var(--text);font:12px ui-monospace;transform:translateY(-160%);transition:transform .15s}
+.skipLink:focus{transform:translateY(0)}
 
 /* ---------- layout shell ---------- */
 .app{min-height:100vh}
@@ -23,10 +25,10 @@ img{max-width:100%;display:block}
 .mark svg{width:17px}
 .brand b{display:block;font:600 13.5px ui-monospace,monospace}
 .brand small{display:block;color:var(--faint);font:9.5px ui-monospace,monospace;margin-top:4px}
-.x{display:none;margin-left:auto}
+.x{display:none;width:44px;height:44px;margin-left:auto;place-items:center}
 .app aside>label{font:10px ui-monospace;color:var(--faint);letter-spacing:.15em;padding:0 7px 9px}
 .app nav{display:flex;flex-direction:column;gap:2px}
-.app nav a{display:flex;align-items:center;gap:10px;padding:10px 7px;color:var(--muted);font:12.5px ui-monospace;border:1px solid transparent;border-radius:3px;transition:background .15s,color .15s,border-color .15s}
+.app nav a{display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 7px;color:var(--muted);font:12.5px ui-monospace;border:1px solid transparent;border-radius:3px;transition:background .15s,color .15s,border-color .15s}
 .app nav a:hover{color:var(--text);background:var(--panel2);border-color:var(--line)}
 .app nav svg{width:15px}
 .arrow{margin-left:auto;opacity:0;transition:opacity .15s,transform .15s}
@@ -36,7 +38,7 @@ img{max-width:100%;display:block}
 .conn i{width:7px;height:7px;border-radius:50%;background:var(--good);margin-top:4px;box-shadow:0 0 0 3px color-mix(in srgb, var(--good) 25%, transparent)}
 .conn b{display:block;font:9.5px ui-monospace}
 .conn small{display:block;color:var(--faint);font:9px ui-monospace;margin-top:4px}
-.theme{display:flex;align-items:center;gap:8px;border:0;background:none;color:var(--muted);padding:12px 7px;text-align:left;cursor:pointer;border-radius:3px;transition:background .15s,color .15s}
+.theme{display:flex;align-items:center;gap:8px;min-height:44px;border:0;background:none;color:var(--muted);padding:12px 7px;text-align:left;cursor:pointer;border-radius:3px;transition:background .15s,color .15s}
 .theme:hover{background:var(--panel2);color:var(--text)}
 .theme svg{width:15px}
 .theme span{font:11.5px ui-monospace}
@@ -122,7 +124,7 @@ h1{font:500 clamp(42px,6vw,76px)/.95 ui-monospace;margin:0 0 18px;letter-spacing
 .systemStrip b{font:11.5px ui-monospace;color:var(--muted);font-weight:400;line-height:1.65}
 
 /* ---------- projects ---------- */
-.projectsGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px}
+.projectsGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:22px}
 .projectCard{border:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
 .projectCard:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--faint)}
 .coverBtn{border:0;padding:0;margin:0;cursor:pointer;display:block;width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;background:var(--panel2);border-bottom:1px solid var(--line)}
@@ -158,12 +160,12 @@ h1{font:500 clamp(42px,6vw,76px)/.95 ui-monospace;margin:0 0 18px;letter-spacing
 .lightbox figcaption b{font-weight:500}
 .lightbox figcaption span{color:#a3a3ab}
 .lightbox figcaption small{color:#6b6b76;border:1px solid rgba(255,255,255,.15);padding:2px 7px}
-.lbClose{position:absolute;top:22px;right:26px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);color:#fff;width:38px;height:38px;display:grid;place-items:center;cursor:pointer;transition:background .15s}
+.lbClose{position:absolute;top:22px;right:26px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);color:#fff;width:44px;height:44px;display:grid;place-items:center;cursor:pointer;transition:background .15s}
 .lbClose:hover{background:rgba(255,255,255,.16)}
 .lbNav{position:absolute;top:50%;translate:0 -50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);color:#fff;width:44px;height:44px;display:grid;place-items:center;cursor:pointer;transition:background .15s}
 .lbNav:hover{background:rgba(255,255,255,.16)}
 .lbPrev{left:24px}.lbNext{right:24px}
-@media(max-width:700px){.lightbox{padding:18px}.lbNav{width:38px;height:38px}.lbPrev{left:8px}.lbNext{right:8px}.lbClose{top:12px;right:12px}}
+@media(max-width:700px){.lightbox{padding:18px}.lbNav{width:44px;height:44px}.lbPrev{left:8px}.lbNext{right:8px}.lbClose{top:12px;right:12px}}
 
 .skills{display:grid;grid-template-columns:1fr 1fr;gap:30px 60px}
 .skill>div{display:grid;grid-template-columns:90px 1fr auto;gap:10px;margin-bottom:10px}
@@ -225,7 +227,7 @@ h1{font:500 clamp(42px,6vw,76px)/.95 ui-monospace;margin:0 0 18px;letter-spacing
 .projectGallery{position:relative;overflow:hidden;border-bottom:1px solid var(--line);background:var(--panel2)}
 .projectGallery .coverBtn{border-bottom:0}
 .galleryControls{position:static;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 12px;background:var(--panel);border-top:1px solid var(--line);color:var(--text)}
-.galleryControls button{display:grid;place-items:center;width:28px;height:28px;padding:0;border:0;background:transparent;color:inherit;cursor:pointer}
+.galleryControls button{display:grid;place-items:center;width:44px;height:44px;flex:none;padding:0;border:0;border-radius:6px;background:transparent;color:inherit;cursor:pointer}
 .galleryControls button:hover{background:rgba(255,255,255,.15)}
 .galleryControls svg{width:16px;height:16px}
 .galleryControls span{font:10px ui-monospace;white-space:nowrap}
@@ -366,7 +368,7 @@ h1{background:linear-gradient(105deg,var(--text) 48%,var(--good));-webkit-backgr
 .githubCalendarSource{display:block;margin:10px 0 0 38px;color:var(--faint);font:8px system-ui,sans-serif}
 .githubCalendarSource a{color:inherit}
 .githubYearPicker{display:flex;flex-direction:column;gap:5px;padding:13px 10px;border-left:1px solid var(--line);background:color-mix(in srgb,var(--bg) 45%,transparent)}
-.githubYearPicker button{min-height:37px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--muted);font:11px ui-monospace;cursor:pointer}
+.githubYearPicker button{min-height:44px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--muted);font:11px ui-monospace;cursor:pointer}
 .githubYearPicker button:hover{border-color:var(--line);color:var(--text)}
 .githubYearPicker button.selected{border-color:color-mix(in srgb,var(--good) 55%,transparent);background:var(--good);color:var(--bg);font-weight:700}
 .caseStudy{border-top:1px solid var(--line);padding-top:12px}
@@ -484,7 +486,7 @@ h1{background:linear-gradient(105deg,var(--text) 48%,var(--good));-webkit-backgr
 .chatHeader b{font:600 12px ui-monospace;color:var(--text)}
 .chatHeader small{display:flex;align-items:center;gap:6px;color:var(--muted);font:10px ui-monospace}
 .chatHeader small i{width:6px;height:6px;border-radius:50%;background:var(--good);box-shadow:0 0 8px var(--good)}
-.chatClose{display:grid;place-items:center;width:32px;height:32px;margin-left:auto;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--muted);cursor:pointer}
+.chatClose{display:grid;place-items:center;width:44px;height:44px;margin-left:auto;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--muted);cursor:pointer}
 .chatClose:hover{color:var(--text);border-color:var(--good)}
 .chatClose svg{width:16px;height:16px}
 .chatMessages{display:flex;flex:1;flex-direction:column;gap:13px;overflow-y:auto;padding:18px 14px;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--faint) transparent}
@@ -501,7 +503,7 @@ h1{background:linear-gradient(105deg,var(--text) 48%,var(--good));-webkit-backgr
 .chatForm:focus-within{border-color:var(--good);box-shadow:0 0 0 3px var(--glow)}
 .chatForm input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--text);font:12px system-ui,sans-serif}
 .chatForm input::placeholder{color:var(--faint)}
-.chatForm button{display:grid;place-items:center;width:36px;height:36px;flex:none;border:0;border-radius:8px;background:var(--good);color:#102016;cursor:pointer}
+.chatForm button{display:grid;place-items:center;width:44px;height:44px;flex:none;border:0;border-radius:8px;background:var(--good);color:#102016;cursor:pointer}
 .chatForm button:disabled{opacity:.4;cursor:default}
 .chatForm button svg{width:16px;height:16px}
 .chatFootnote{padding:8px 15px 11px;text-align:center;color:var(--faint);font:8px ui-monospace;letter-spacing:.12em}
@@ -593,23 +595,37 @@ h1{background:linear-gradient(105deg,var(--text) 48%,var(--good));-webkit-backgr
 .overlay{display:none}
 
 @media(max-width:900px){
-  .projectsGrid{grid-template-columns:1fr}
-}
-@media(max-width:700px){
-  .app aside{transform:translateX(-100%);transition:.2s;width:280px}
+  .app aside{transform:translateX(-100%);transition:transform .2s ease;width:min(280px,calc(100vw - 48px))}
   .app aside.open{transform:translateX(0)}
-  .x{display:block;background:none;border:0;color:var(--text);cursor:pointer}
+  .x{display:grid;background:none;border:0;color:var(--text);cursor:pointer}
   .overlay{display:block;position:fixed;inset:0;background:#0008;z-index:19}
   .app main{margin-left:0}
   .mobile{display:flex;position:sticky;top:0;z-index:10;height:58px;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--line);background:var(--bg)}
-  .mobile button{width:34px;height:34px;display:grid;place-items:center;background:var(--panel);border:1px solid var(--line);color:var(--text)}
+  .mobile button{width:44px;height:44px;display:grid;place-items:center;background:var(--panel);border:1px solid var(--line);border-radius:6px;color:var(--text)}
   .mobile button svg{width:17px}
   .mobile b{font:10px ui-monospace}
-  .section{padding:75px 20px}
-  .hero{padding-top:65px}
+  .scrollProgress{top:58px;left:0;height:2px}
+  html{scroll-padding-top:72px}
+}
+
+@media(max-width:700px){
+  .app aside{transform:translateX(-100%);transition:transform .2s ease}
+  .app aside.open{transform:translateX(0)}
+  .x{display:grid;background:none;border:0;color:var(--text);cursor:pointer}
+  .overlay{display:block;position:fixed;inset:0;background:#0008;z-index:19}
+  .app main{margin-left:0}
+  .mobile{display:flex;position:sticky;top:0;z-index:10;height:58px;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--line);background:var(--bg)}
+  .mobile button{width:44px;height:44px;display:grid;place-items:center;background:var(--panel);border:1px solid var(--line);border-radius:6px;color:var(--text)}
+  .mobile button svg{width:17px}
+  .mobile b{font:10px ui-monospace}
+  .section{padding:clamp(52px,12vw,72px) 20px}
+  .hero{padding-top:clamp(42px,10vw,62px)}
   .heroGrid,.two,.contact{grid-template-columns:1fr}
   .photo{max-width:290px}
+  .photo{width:min(100%,290px);margin-inline:auto}
   .stats{grid-template-columns:1fr 1fr}
+  .stats b{font-size:clamp(14px,4vw,20px);overflow-wrap:anywhere}
+  .stats small{font-size:8px;line-height:1.5}
   .stats>div{border-bottom:1px solid var(--line)}
   .title{align-items:flex-start;flex-direction:column}
   .title code{display:none}
@@ -623,4 +639,14 @@ h1{background:linear-gradient(105deg,var(--text) 48%,var(--good));-webkit-backgr
   .systemStrip>div{border-right:0;border-bottom:1px solid var(--line)}
   .systemStrip>div:last-child{border-bottom:0}
   .foot{padding:25px 20px;flex-direction:column;gap:8px}
+  .galleryControls{padding-inline:8px}
+  .galleryControls button{width:44px;height:44px}
+  .thumbRow{gap:10px;padding:9px 12px 12px;scroll-snap-type:x proximity}
+  .thumbBtn{width:64px;height:46px;scroll-snap-align:start}
+  .projectBody{gap:13px}
+  .chatToggle{min-height:50px}
+  .chatForm button,.chatClose{width:44px;height:44px}
+  .chatPrompts button{min-height:44px;padding:9px 12px}
 }
+@media(hover:none){.coverBtn .expand{opacity:1;transform:none}}
+.theme:focus-visible,.app nav a:focus-visible,.galleryControls button:focus-visible,.thumbBtn:focus-visible,.chatToggle:focus-visible{outline:3px solid var(--good);outline-offset:3px}
