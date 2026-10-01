@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 import {
   Activity, ArrowUpRight, BriefcaseBusiness, Check, ChevronLeft, ChevronRight,
-  Code2, Database, Expand, Github, Globe2, Mail, Menu, Moon, Server, Sun,
+  Code2, Database, Expand, Github, Globe2, Mail, Menu, MessageCircle, Moon, Send, Server, Sun,
   Terminal, X, Zap
 } from 'lucide-react';
 import { supabase } from './lib/supabase';
@@ -128,6 +128,28 @@ function normalizeGallery(images) {
   return normalized.length ? normalized : null;
 }
 
+const darkPortraits = {
+  right: '/darkright.png',
+  downRight: '/darkdownright.png',
+  down: '/darkdown.png',
+  downLeft: '/darkdownleft.png',
+  left: '/darkleft.png',
+  upLeft: '/darkleftup.png',
+  up: '/darkup.png',
+  upRight: '/darkupright.png',
+};
+
+const lightPortraits = {
+  right: '/lightright.png',
+  downRight: '/lightdownright.png',
+  down: '/lightdown.png',
+  downLeft: '/lightdownleft.png',
+  left: '/lightleft.png',
+  upLeft: '/lightupleft.png',
+  up: '/lightup.png',
+  upRight: '/lightupright.png',
+};
+
 /* ------------------------------------------------------------------ */
 /*  App shell                                                          */
 /* ------------------------------------------------------------------ */
@@ -137,13 +159,83 @@ function App() {
   const [data, setData] = useState(demo);
   const [open, setOpen] = useState(false);
   const [connected, setConnected] = useState(false);
+  const [lookDirection, setLookDirection] = useState(null);
+  const [activeSection, setActiveSection] = useState('home');
   const [visitorCount, setVisitorCount] = useState(null);
   const [lightbox, setLightbox] = useState(null); // { title, images, index }
+  const progressRef = useRef(null);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem('marlon-theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    function updateProgress() {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollable > 0 ? window.scrollY / scrollable : 0;
+      progressRef.current?.style.setProperty('--scroll-progress', String(Math.min(1, Math.max(0, progress))));
+    }
+    updateProgress();
+    const resizeObserver = new ResizeObserver(updateProgress);
+    resizeObserver.observe(document.documentElement);
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    window.addEventListener('resize', updateProgress);
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('scroll', updateProgress);
+      window.removeEventListener('resize', updateProgress);
+    };
+  }, []);
+
+  useEffect(() => {
+    const sections = document.querySelectorAll('main section[id]:not(#portfolio-chat-panel)');
+    const observer = new IntersectionObserver((entries) => {
+      const current = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+      if (current) setActiveSection(current.target.id);
+    }, { rootMargin: '-45% 0px -54% 0px', threshold: 0 });
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, [data]);
+
+  useEffect(() => {
+    function trackPagePointer(event) {
+      if (event.pointerType === 'touch') return;
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+      const dx = event.clientX - centerX;
+      const dy = event.clientY - centerY;
+      if (Math.hypot(dx, dy) < Math.min(centerX, centerY) * 0.06) {
+        setLookDirection(null);
+        return;
+      }
+
+      const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+      let direction;
+      if (angle >= -22.5 && angle < 22.5) direction = 'right';
+      else if (angle >= 22.5 && angle < 67.5) direction = 'downRight';
+      else if (angle >= 67.5 && angle < 112.5) direction = 'down';
+      else if (angle >= 112.5 && angle < 157.5) direction = 'downLeft';
+      else if (angle >= 157.5 || angle < -157.5) direction = 'left';
+      else if (angle >= -157.5 && angle < -112.5) direction = 'upLeft';
+      else if (angle >= -112.5 && angle < -67.5) direction = 'up';
+      else direction = 'upRight';
+      setLookDirection(direction);
+    }
+
+    function resetPagePointer() {
+      setLookDirection(null);
+    }
+
+    window.addEventListener('pointermove', trackPagePointer);
+    window.addEventListener('pointerleave', resetPagePointer);
+    return () => {
+      window.removeEventListener('pointermove', trackPagePointer);
+      window.removeEventListener('pointerleave', resetPagePointer);
+    };
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -216,14 +308,15 @@ function App() {
 
   return (
     <div className="app">
-      <Sidebar open={open} close={() => setOpen(false)} theme={theme} toggle={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))} connected={connected} />
+      <div ref={progressRef} className="scrollProgress" aria-hidden="true" />
+      <Sidebar open={open} close={() => setOpen(false)} theme={theme} toggle={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))} connected={connected} activeSection={activeSection} onSelect={setActiveSection} />
       <main>
         <header className="mobile">
           <button onClick={() => setOpen(true)}><Menu /></button>
           <b>MARLON_DB</b>
           <button onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}>{theme === 'dark' ? <Sun /> : <Moon />}</button>
         </header>
-        <Home data={data} openLightbox={openLightbox} visitorCount={visitorCount} />
+        <Home data={data} theme={theme} lookDirection={lookDirection} openLightbox={openLightbox} visitorCount={visitorCount} />
       </main>
       <Lightbox state={lightbox} onClose={closeLightbox} onNav={navLightbox} />
     </div>
@@ -234,7 +327,7 @@ function App() {
 /*  Sidebar                                                             */
 /* ------------------------------------------------------------------ */
 
-function Sidebar({ open, close, theme, toggle, connected }) {
+function Sidebar({ open, close, theme, toggle, connected, activeSection, onSelect }) {
   const nav = [
     ['Home', '#home', Terminal],
     ['About', '#about', Code2],
@@ -256,7 +349,7 @@ function Sidebar({ open, close, theme, toggle, connected }) {
         <label>DATABASE</label>
         <nav>
           {nav.map(([n, h, I]) => (
-            <a href={h} onClick={close} key={n}>
+            <a href={h} onClick={() => { close(); onSelect(h.slice(1)); }} key={n} className={activeSection === h.slice(1) ? 'active' : ''} aria-current={activeSection === h.slice(1) ? 'location' : undefined}>
               <I /><span>{n}</span><ChevronRight className="arrow" />
             </a>
           ))}
@@ -281,17 +374,29 @@ function Sidebar({ open, close, theme, toggle, connected }) {
 /*  Home page content                                                  */
 /* ------------------------------------------------------------------ */
 
-function Home({ data, openLightbox, visitorCount }) {
+function Home({ data, theme, lookDirection, openLightbox, visitorCount }) {
   const p = data.profile;
+  const portraitSrc = theme === 'light'
+    ? lookDirection ? lightPortraits[lookDirection] : '/profile-light.png'
+    : lookDirection ? darkPortraits[lookDirection] : '/profile.png';
+
   return (
     <>
       <section id="home" className="section hero">
         <div className="eyebrow"><i /> SYSTEM.DEVELOPER <em>/</em> FULL-STACK</div>
         <div className="heroGrid">
           <div className="photo">
-            <div>
+            <div className="dbMascot" aria-hidden="true">
+              <span className="dbSpeech">HELLO!</span>
+              <span className="dbWave"><i /><i /><i /><i /><b /></span>
+              <span className="dbCylinder">
+                <span className="dbEyes"><i /><i /></span>
+                <span className="dbSmile" />
+              </span>
+            </div>
+            <div className="photoFrame">
               <div className="scanlines" />
-              <img src="/profile.png" alt="Marlon Armado" className="profileImage" />
+              <img key={portraitSrc} src={portraitSrc} alt="Marlon Armado" className="profileImage" />
             </div>
           </div>
           <div>
@@ -398,8 +503,83 @@ function Home({ data, openLightbox, visitorCount }) {
       </Section>
 
       <Contact email={p.email} />
+      <PortfolioChatbot portfolio={data} />
       <div className="foot">MARLON_DB / SYSTEM.DEVELOPER <span>BUILT WITH REACT + POSTGRESQL</span></div>
     </>
+  );
+}
+
+function PortfolioChatbot({ portfolio }) {
+  const [open, setOpen] = useState(false);
+  const [question, setQuestion] = useState('');
+  const [messages, setMessages] = useState([
+    { role: 'assistant', text: 'Hi! I can answer questions using the information in this portfolio. Ask me about projects, skills, services, experience, or contact details.' },
+  ]);
+  const messagesViewport = useRef(null);
+  const input = useRef(null);
+
+  useEffect(() => {
+    const viewport = messagesViewport.current;
+    viewport?.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+  }, [messages]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    function closeOnEscape(event) {
+      if (event.key === 'Escape') setOpen(false);
+    }
+    window.addEventListener('keydown', closeOnEscape);
+    input.current?.focus();
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [open]);
+
+  function sendQuestion(value = question) {
+    const text = value.trim();
+    if (!text) return;
+    setMessages((current) => [
+      ...current,
+      { role: 'user', text },
+      { role: 'assistant', text: answerFromPortfolio(text, portfolio) },
+    ]);
+    setQuestion('');
+  }
+
+  return (
+    <div className="portfolioChat">
+      {open && (
+        <section id="portfolio-chat-panel" className="chatPanel" role="dialog" aria-label="Portfolio chatbot">
+          <header className="chatHeader">
+            <div className="chatAvatar"><Database /></div>
+            <div><b>Portfolio assistant</b><small><i /> Answers from this portfolio</small></div>
+            <button className="chatClose" onClick={() => setOpen(false)} aria-label="Close chatbot"><X /></button>
+          </header>
+          <div className="chatMessages" ref={messagesViewport} role="log" aria-live="polite" aria-relevant="additions">
+            {messages.map((message, index) => (
+              <div className={`chatMessage ${message.role}`} key={`${index}-${message.role}`}>
+                {message.role === 'assistant' && <span className="chatMessageIcon"><Database /></span>}
+                <p>{message.text}</p>
+              </div>
+            ))}
+          </div>
+          {messages.length === 1 && (
+            <div className="chatPrompts">
+              <button onClick={() => sendQuestion('What projects has Marlon built?')}>Projects</button>
+              <button onClick={() => sendQuestion('What skills does Marlon have?')}>Skills</button>
+              <button onClick={() => sendQuestion('What services does Marlon offer?')}>Services</button>
+            </div>
+          )}
+          <form className="chatForm" onSubmit={(event) => { event.preventDefault(); sendQuestion(); }}>
+            <input ref={input} value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Ask about the portfolio..." aria-label="Ask a question about the portfolio" />
+            <button type="submit" aria-label="Send question" disabled={!question.trim()}><Send /></button>
+          </form>
+          <div className="chatFootnote">LOCAL PORTFOLIO Q&amp;A</div>
+        </section>
+      )}
+      <button className={`chatToggle${open ? ' active' : ''}`} onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-controls="portfolio-chat-panel" aria-label={open ? 'Close portfolio assistant' : 'Open portfolio assistant'}>
+        {open ? <X /> : <MessageCircle />}
+        {!open && <span>Ask me</span>}
+      </button>
+    </div>
   );
 }
 
@@ -424,16 +604,26 @@ function GithubActivity() {
         <code>@MARLONARMADO03 <ArrowUpRight /></code>
       </div>
       <a className="githubGraph reveal" href="https://github.com/marlonarmado03" target="_blank" rel="noreferrer" aria-label="Open Marlon Armado's GitHub profile">
+        <div className="githubCardHead">
+          <div className="githubIdentity">
+            <span className="githubMark"><Github /></span>
+            <span><b>Marlon Armado</b><small>@marlonarmado03 · developer</small></span>
+          </div>
+          <span className="githubVisit">VISIT PROFILE <ArrowUpRight /></span>
+        </div>
+        <div className="githubStatLine"><b>Contribution graph</b><span>Activity preview</span><i>YEAR IN CODE</i></div>
         <div className="graphContent">
+          <div className="graphMonths" aria-hidden="true"><span>JAN</span><span>FEB</span><span>MAR</span><span>APR</span><span>MAY</span><span>JUN</span><span>JUL</span><span>AUG</span><span>SEP</span><span>OCT</span><span>NOV</span><span>DEC</span></div>
           <div className="graphBody">
+            <div className="graphWeekdays" aria-hidden="true"><span>MON</span><span>WED</span><span>FRI</span></div>
             <div className="contributionGrid" aria-hidden="true">
               {cells.map((level, index) => <i key={index} data-level={level} />)}
             </div>
           </div>
         </div>
         <div className="githubGraphBottom">
-          <span>1,599 CONTRIBUTIONS IN THE LAST YEAR</span>
-          <div><Github /> VIEW PROFILE <ArrowUpRight /></div>
+          <span className="githubOpenSource"><i /> PUBLIC PROFILE</span>
+          <div className="githubLegend"><span>LESS</span><i data-level="0" /><i data-level="1" /><i data-level="2" /><i data-level="3" /><i data-level="4" /><span>MORE</span></div>
         </div>
       </a>
     </section>
@@ -450,7 +640,7 @@ function ProjectCard({ project: x, index: i, openLightbox }) {
       {cover ? (
         <div className="projectGallery">
           <button className="coverBtn" onClick={() => openLightbox(x.title, images, selectedImage)} aria-label={`View ${cover.caption || x.title} full size`}>
-            <img src={cover.src} alt={cover.caption || x.title} />
+            <img src={cover.src} alt={cover.caption || x.title} loading="lazy" decoding="async" />
             <span className="expand"><Expand /> {images.length > 1 ? 'open gallery' : 'view full size'}</span>
           </button>
           {images.length > 1 && (
@@ -464,7 +654,7 @@ function ProjectCard({ project: x, index: i, openLightbox }) {
             <div className="thumbRow" aria-label={`Choose an image for ${x.title}`}>
               {images.map((img, idx) => (
                 <button key={img.src} className={`thumbBtn${selectedImage === idx ? ' selected' : ''}`} onClick={() => setSelectedImage(idx)} aria-label={`Show image ${idx + 1}: ${img.caption || x.title}`} aria-pressed={selectedImage === idx}>
-                  <img src={img.src} alt="" />
+                  <img src={img.src} alt="" loading="lazy" decoding="async" />
                   <span>{String(idx + 1).padStart(2, '0')}</span>
                 </button>
               ))}
@@ -559,6 +749,68 @@ function Stat({ v, l }) {
 function date(v) {
   if (!v) return '';
   return new Date(v).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase();
+}
+
+function answerFromPortfolio(rawQuestion, portfolio) {
+  const question = rawQuestion.toLowerCase();
+  const profile = portfolio.profile;
+  const projects = portfolio.projects || [];
+  const skills = portfolio.skills || [];
+  const services = portfolio.services || [];
+  const experience = portfolio.experience || [];
+
+  if (/^(hi|hello|hey|kumusta|kamusta)\b/.test(question.trim())) {
+    return `Hi! I can tell you about ${profile.name}'s projects, skills, services, experience, and how to get in touch.`;
+  }
+
+  const projectAliases = [
+    ['human resources', 'hr system', 'hr management', 'hr'],
+    ['car rental', 'rental system', 'transport system'],
+    ['barangay', 'brgy'],
+    ['j & r', 'j and r', 'construction website'],
+  ];
+  const matchedProject = projects.find((project, index) =>
+    question.includes(project.title.toLowerCase()) ||
+    (projectAliases[index] || []).some((alias) => question.includes(alias))
+  );
+  if (matchedProject && /project|proyekto|system|website|application|built|about|tell me|what is|describe|\bhr\b|rental|barangay|construction|tungkol/.test(question)) {
+    const stack = (matchedProject.technologies || []).join(', ');
+    return `${matchedProject.title}: ${matchedProject.description}${stack ? `\nTechnologies: ${stack}.` : ''}`;
+  }
+
+  if (/project|portfolio|work|built|systems|proyekto|ginawa/.test(question)) {
+    return `Featured projects: ${projects.map((project) => project.title).join('; ')}. Ask me about a specific project to learn more.`;
+  }
+
+  const matchedSkill = skills.find((skill) => question.includes(skill.name.toLowerCase()));
+  if (matchedSkill) {
+    return `${profile.name}'s portfolio lists ${matchedSkill.name} under ${matchedSkill.category}${matchedSkill.level != null ? `, with a skill level of ${matchedSkill.level}%` : ''}.`;
+  }
+  if (/skill|technology|technologies|tech stack|programming|language|tools|kasanayan|kakayahan|teknolohiya/.test(question)) {
+    return `Skills listed in the portfolio: ${skills.map((skill) => `${skill.name}${skill.level != null ? ` (${skill.level}%)` : ''}`).join(', ')}.`;
+  }
+
+  if (/contact|email|reach|message|hire|available|availability|freelance|kontak|kumuha/.test(question)) {
+    return `${profile.availability}. You can contact ${profile.name} at ${profile.email} using the Contact section.`;
+  }
+  if (/service|offer|help with|what can .* do|serbisyo|matutulong/.test(question)) {
+    return `Services listed in the portfolio: ${services.map((service) => service.title).join(', ')}.`;
+  }
+  if (/experience|career|years|how long|karanasan|ilang taon/.test(question)) {
+    const roles = experience.map((item) => `${item.position} at ${item.company}${item.start_date ? ` (since ${date(item.start_date)})` : ''}`).join('; ');
+    return `The portfolio lists 4+ years of experience.${roles ? ` Experience: ${roles}.` : ''}`;
+  }
+  if (/location|where.*from|where.*based|lokasyon|saan.*based/.test(question)) {
+    return `${profile.name} is based in ${profile.location}.`;
+  }
+  if (/github/.test(question)) {
+    return `You can find ${profile.name} on GitHub: ${profile.github_url}`;
+  }
+  if (/who|about|name|bio|background|introduc|developer|sino|tungkol|talambuhay/.test(question)) {
+    return `${profile.name} is a ${profile.role} and ${profile.headline} based in ${profile.location}. ${profile.bio}`;
+  }
+
+  return `I can answer using the portfolio information about ${profile.name}'s projects, skills, services, experience, location, and contact details. Try asking about one of those.`;
 }
 
 function Contact({ email }) {
