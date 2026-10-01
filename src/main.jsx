@@ -129,25 +129,25 @@ function normalizeGallery(images) {
 }
 
 const darkPortraits = {
-  right: '/darkright.png',
-  downRight: '/darkdownright.png',
-  down: '/darkdown.png',
-  downLeft: '/darkdownleft.png',
-  left: '/darkleft.png',
-  upLeft: '/darkleftup.png',
-  up: '/darkup.png',
-  upRight: '/darkupright.png',
+  right: '/portraits/darkright.jpg',
+  downRight: '/portraits/darkdownright.jpg',
+  down: '/portraits/darkdown.jpg',
+  downLeft: '/portraits/darkdownleft.jpg',
+  left: '/portraits/darkleft.jpg',
+  upLeft: '/portraits/darkleftup.jpg',
+  up: '/portraits/darkup.jpg',
+  upRight: '/portraits/darkupright.jpg',
 };
 
 const lightPortraits = {
-  right: '/lightright.png',
-  downRight: '/lightdownright.png',
-  down: '/lightdown.png',
-  downLeft: '/lightdownleft.png',
-  left: '/lightleft.png',
-  upLeft: '/lightupleft.png',
-  up: '/lightup.png',
-  upRight: '/lightupright.png',
+  right: '/portraits/lightright.jpg',
+  downRight: '/portraits/lightdownright.jpg',
+  down: '/portraits/lightdown.jpg',
+  downLeft: '/portraits/lightdownleft.jpg',
+  left: '/portraits/lightleft.jpg',
+  upLeft: '/portraits/lightupleft.jpg',
+  up: '/portraits/lightup.jpg',
+  upRight: '/portraits/lightupright.jpg',
 };
 
 /* ------------------------------------------------------------------ */
@@ -160,6 +160,7 @@ function App() {
   const [open, setOpen] = useState(false);
   const [connected, setConnected] = useState(false);
   const [lookDirection, setLookDirection] = useState(null);
+  const [readyPortraitTheme, setReadyPortraitTheme] = useState(null);
   const [activeSection, setActiveSection] = useState('home');
   const [visitorCount, setVisitorCount] = useState(null);
   const [lightbox, setLightbox] = useState(null); // { title, images, index }
@@ -169,6 +170,20 @@ function App() {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem('marlon-theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const images = Object.values({ ...darkPortraits, ...lightPortraits }).map((src) => {
+      const image = new window.Image();
+      image.decoding = 'async';
+      image.src = src;
+      return image.decode().catch(() => undefined);
+    });
+    Promise.all(images).then(() => {
+      if (!cancelled) setReadyPortraitTheme('all');
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     function updateProgress() {
@@ -316,7 +331,7 @@ function App() {
           <b>MARLON_DB</b>
           <button onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}>{theme === 'dark' ? <Sun /> : <Moon />}</button>
         </header>
-        <Home data={data} theme={theme} lookDirection={lookDirection} openLightbox={openLightbox} visitorCount={visitorCount} />
+        <Home data={data} theme={theme} lookDirection={lookDirection} readyPortraitTheme={readyPortraitTheme} openLightbox={openLightbox} visitorCount={visitorCount} />
       </main>
       <Lightbox state={lightbox} onClose={closeLightbox} onNav={navLightbox} />
     </div>
@@ -374,11 +389,10 @@ function Sidebar({ open, close, theme, toggle, connected, activeSection, onSelec
 /*  Home page content                                                  */
 /* ------------------------------------------------------------------ */
 
-function Home({ data, theme, lookDirection, openLightbox, visitorCount }) {
+function Home({ data, theme, lookDirection, readyPortraitTheme, openLightbox, visitorCount }) {
   const p = data.profile;
-  const portraitSrc = theme === 'light'
-    ? lookDirection ? lightPortraits[lookDirection] : '/profile-light.png'
-    : lookDirection ? darkPortraits[lookDirection] : '/profile.png';
+  const portraitSet = theme === 'light' ? lightPortraits : darkPortraits;
+  const neutralPortrait = theme === 'light' ? '/profile-light.png' : '/profile.png';
 
   return (
     <>
@@ -396,7 +410,17 @@ function Home({ data, theme, lookDirection, openLightbox, visitorCount }) {
             </div>
             <div className="photoFrame">
               <div className="scanlines" />
-              <img key={portraitSrc} src={portraitSrc} alt="Marlon Armado" className="profileImage" />
+              <img src={neutralPortrait} alt="Marlon Armado" className="profileImage" decoding="async" />
+              {readyPortraitTheme === 'all' && Object.entries(portraitSet).map(([direction, src]) => (
+                <img
+                  key={`${theme}-${direction}`}
+                  src={src}
+                  alt=""
+                  aria-hidden="true"
+                  className={`profileImage profileDirectionImage${lookDirection === direction ? ' visible' : ''}`}
+                  decoding="async"
+                />
+              ))}
             </div>
           </div>
           <div>
