@@ -319,6 +319,69 @@ h1{background:linear-gradient(105deg,var(--text) 48%,var(--good));-webkit-backgr
 .contributionGrid i[data-level="3"]{background:color-mix(in srgb,var(--good) 72%,var(--line))}
 .contributionGrid i[data-level="4"]{background:var(--good)}
 .githubGraphBottom>div{color:var(--good)}
+.githubStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin-top:18px;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:var(--line)}
+.githubStats>div{display:grid;gap:7px;padding:15px;background:var(--panel)}
+.githubStats b{font:600 20px ui-monospace;color:var(--good)}
+.githubStats span,.githubRepoHeading>span{font:8px ui-monospace;letter-spacing:.1em;color:var(--faint)}
+.githubRepoHeading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:23px;margin-bottom:11px}
+.githubRepoHeading>b{font:500 12px ui-monospace;color:var(--text)}
+.githubRepos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.githubRepo{display:flex;min-width:0;flex-direction:column;gap:10px;padding:14px;border:1px solid var(--line);border-radius:8px;background:color-mix(in srgb,var(--panel) 76%,transparent);color:var(--text);text-decoration:none;transition:border-color .18s,transform .18s,background .18s}
+.githubRepo:hover{border-color:color-mix(in srgb,var(--good) 48%,var(--line));background:var(--panel2);transform:translateY(-2px)}
+.githubRepoTop{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--good);font:500 11px ui-monospace;overflow-wrap:anywhere}
+.githubRepoTop svg{width:13px;height:13px;flex:none;transition:transform .18s}
+.githubRepo:hover .githubRepoTop svg{transform:translate(2px,-2px)}
+.githubRepoDescription{display:-webkit-box;min-height:34px;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;color:var(--muted);font:11px/1.6 system-ui,sans-serif}
+.githubRepoMeta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:auto;color:var(--faint);font:8px ui-monospace;letter-spacing:.04em}
+.githubRepoMeta i{display:inline-flex;align-items:center;gap:5px;font-style:normal}
+.githubRepoMeta i>b{width:7px;height:7px;border-radius:50%;background:var(--good)}
+.githubRepoMeta i>span{font-size:12px;color:var(--good)}
+.githubMessage{margin:0;padding:22px 14px;border:1px dashed var(--line);border-radius:8px;color:var(--muted);font:12px/1.6 system-ui,sans-serif}
+.githubMessage a{display:inline-flex;align-items:center;gap:4px;color:var(--good);text-decoration:none}
+.githubMessage a svg{width:13px;height:13px}
+.githubGraphBottom>span:last-child{color:var(--faint);font-size:8px}
+.githubCalendar{display:grid;grid-template-columns:minmax(0,1fr) 96px;gap:14px;margin-top:18px;border:1px solid var(--line);border-radius:8px;background:color-mix(in srgb,var(--panel) 74%,transparent)}
+.githubCalendarContent{min-width:0;padding:16px 14px 12px}
+.githubCalendarHeading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.githubCalendarHeading>b{font:500 13px ui-monospace;color:var(--text)}
+.githubCalendarHeading>span{color:var(--faint);font:8px ui-monospace;letter-spacing:.1em}
+.githubCalendarScroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:var(--faint) transparent}
+.githubCalendarCanvas{--cell-size:12px;--cell-gap:4px;min-width:max-content;padding:2px 1px 5px;transition:opacity .15s}
+.githubCalendarCanvas.isLoading{opacity:.48}
+.githubMonths{display:grid;grid-template-columns:repeat(var(--week-count),var(--cell-size));grid-auto-flow:column;gap:var(--cell-gap);height:17px;margin-left:38px;color:var(--muted);font:9px system-ui,sans-serif}
+.githubCalendarBody{display:flex;align-items:flex-start;gap:9px}
+.githubWeekdays{display:grid;grid-template-rows:repeat(7,var(--cell-size));gap:var(--cell-gap);width:29px;flex:none;color:var(--muted);font:9px system-ui,sans-serif}
+.githubWeekdays span:nth-child(1){grid-row:2}.githubWeekdays span:nth-child(2){grid-row:4}.githubWeekdays span:nth-child(3){grid-row:6}
+.githubContributionGrid{display:grid;grid-template-rows:repeat(7,var(--cell-size));grid-auto-flow:column;grid-auto-columns:var(--cell-size);gap:var(--cell-gap)}
+.githubContributionGrid i,.githubCalendarLegend i{display:block;width:var(--cell-size);height:var(--cell-size);border:1px solid color-mix(in srgb,var(--line) 58%,transparent);border-radius:3px;background:var(--panel2)}
+.githubContributionGrid i:not(.emptyDay){cursor:default}
+.githubContributionGrid i[data-level="1"],.githubCalendarLegend i[data-level="1"]{background:color-mix(in srgb,var(--good) 22%,var(--panel2))}
+.githubContributionGrid i[data-level="2"],.githubCalendarLegend i[data-level="2"]{background:color-mix(in srgb,var(--good) 43%,var(--panel2))}
+.githubContributionGrid i[data-level="3"],.githubCalendarLegend i[data-level="3"]{background:color-mix(in srgb,var(--good) 68%,var(--panel2))}
+.githubContributionGrid i[data-level="4"],.githubCalendarLegend i[data-level="4"]{background:var(--good)}
+.githubContributionGrid i.emptyDay{visibility:hidden}
+.githubCalendarLegend{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 0 38px;color:var(--muted);font:9px system-ui,sans-serif}
+.githubCalendarLegend>div{display:flex;align-items:center;gap:4px}
+.githubCalendarLegend i{--cell-size:11px}
+.githubCalendarSource{display:block;margin:10px 0 0 38px;color:var(--faint);font:8px system-ui,sans-serif}
+.githubCalendarSource a{color:inherit}
+.githubYearPicker{display:flex;flex-direction:column;gap:5px;padding:13px 10px;border-left:1px solid var(--line);background:color-mix(in srgb,var(--bg) 45%,transparent)}
+.githubYearPicker button{min-height:37px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--muted);font:11px ui-monospace;cursor:pointer}
+.githubYearPicker button:hover{border-color:var(--line);color:var(--text)}
+.githubYearPicker button.selected{border-color:color-mix(in srgb,var(--good) 55%,transparent);background:var(--good);color:var(--bg);font-weight:700}
+.caseStudy{border-top:1px solid var(--line);padding-top:12px}
+.caseStudy summary{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--good);font:10px ui-monospace;cursor:pointer;list-style:none}
+.caseStudy summary::-webkit-details-marker{display:none}
+.caseStudy summary svg{width:13px;height:13px;transition:transform .18s}
+.caseStudy[open] summary svg{transform:rotate(90deg)}
+.caseStudyContent{display:grid;gap:9px;margin-top:13px;padding:13px;border:1px solid var(--line);border-radius:7px;background:color-mix(in srgb,var(--panel) 82%,transparent)}
+.caseStudyContent>b{font:500 9px ui-monospace;color:var(--text);letter-spacing:.06em;text-transform:uppercase}
+.caseStudyContent>p{font-size:11px;line-height:1.65}
+.caseStudyContent ul{display:grid;gap:6px;margin:0;padding-left:16px;color:var(--muted);font:10.5px/1.6 system-ui,sans-serif}
+.caseStudyContent li::marker{color:var(--good)}
+.caseStudyContent>span{margin-top:4px;color:var(--faint);font:8px ui-monospace;letter-spacing:.1em}
+.caseStudyContent .stack{margin-top:-3px}
+.caseStudyContent .stack small{font-size:8px}
 .lightbox{background:rgba(4,8,6,.94)}
 .foot{border-top:1px solid var(--line)}
 ::selection{background:var(--good);color:#101813}
@@ -328,6 +391,18 @@ h1{background:linear-gradient(105deg,var(--text) 48%,var(--good));-webkit-backgr
   .stats{margin-top:45px}
   .stats>div{padding:19px 14px}
   .githubGraph{padding:14px}
+  .githubRepos{grid-template-columns:1fr}
+  .githubStats>div{padding:12px 9px}
+  .githubStats b{font-size:17px}
+  .githubStats span{font-size:7px}
+  .githubRepoHeading{align-items:flex-start;flex-direction:column}
+  .githubCalendar{grid-template-columns:minmax(0,1fr) 66px;gap:0}
+  .githubCalendarContent{padding:13px 9px 10px}
+  .githubCalendarHeading{align-items:flex-start;flex-direction:column;gap:5px}
+  .githubCalendarHeading>b{font-size:11px}
+  .githubYearPicker{padding:10px 5px}
+  .githubYearPicker button{font-size:10px}
+  .githubCalendarLegend{font-size:8px}
 }
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}
@@ -448,7 +523,7 @@ h1{background:linear-gradient(105deg,var(--text) 48%,var(--good));-webkit-backgr
 .githubMark svg{width:21px;height:21px}
 .githubIdentity>span:last-child{display:grid;gap:5px;min-width:0}
 .githubIdentity b{font:600 13px ui-monospace;color:var(--text)}
-.githubIdentity small{font:10px ui-monospace;color:var(--muted)}
+.githubIdentity small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:10px ui-monospace;color:var(--muted)}
 .githubVisit{display:flex;align-items:center;gap:6px;flex:none;color:var(--good);font:9px ui-monospace;letter-spacing:.08em}
 .githubVisit svg{width:13px;height:13px;transition:transform .2s}
 .githubGraph:hover .githubVisit svg{transform:translate(2px,-2px)}

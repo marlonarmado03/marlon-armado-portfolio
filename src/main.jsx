@@ -612,46 +612,175 @@ function PortfolioChatbot({ portfolio }) {
 /* ------------------------------------------------------------------ */
 
 function GithubActivity() {
-  // A fixed pattern keeps the portfolio preview consistent while evoking the GitHub activity graph.
-  const cells = Array.from({ length: 53 * 7 }, (_, i) => {
-    const week = Math.floor(i / 7);
-    const day = i % 7;
-    const active = (week * 11 + day * 7 + (week % 5) * 3) % 17;
-    const level = active < 3 ? 4 : active < 6 ? 3 : active < 9 ? 2 : active < 12 ? 1 : 0;
-    return level;
-  });
+  const [github, setGithub] = useState({ profile: null, repos: [], loading: true, error: false });
+  const currentYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [hasEntered, setHasEntered] = useState(false);
+  const [calendar, setCalendar] = useState({ contributions: [], total: 0, loading: false, error: false });
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    async function loadGithub() {
+      try {
+        const headers = { Accept: 'application/vnd.github+json' };
+        const [profileResponse, reposResponse] = await Promise.all([
+          fetch('https://api.github.com/users/marlonarmado03', { headers, signal: controller.signal }),
+          fetch('https://api.github.com/users/marlonarmado03/repos?sort=updated&per_page=6', { headers, signal: controller.signal }),
+        ]);
+        if (!profileResponse.ok || !reposResponse.ok) throw new Error('GitHub request failed');
+        const [profile, repos] = await Promise.all([profileResponse.json(), reposResponse.json()]);
+        if (!controller.signal.aborted) setGithub({ profile, repos, loading: false, error: false });
+      } catch {
+        if (!controller.signal.aborted) setGithub({ profile: null, repos: [], loading: false, error: true });
+      }
+    }
+    const section = sectionRef.current;
+    if (!section) return () => controller.abort();
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        observer.disconnect();
+        setHasEntered(true);
+        loadGithub();
+      }
+    }, { rootMargin: '220px' });
+    observer.observe(section);
+    return () => { observer.disconnect(); controller.abort(); };
+  }, []);
+
+  useEffect(() => {
+    if (!hasEntered) return undefined;
+    const controller = new AbortController();
+    setCalendar((previous) => ({ ...previous, loading: true, error: false }));
+    fetch(`https://github-contributions-api.jogruber.de/v4/marlonarmado03?y=${selectedYear}`, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error('Contribution calendar request failed');
+        return response.json();
+      })
+      .then((data) => {
+        if (!Array.isArray(data.contributions)) throw new Error('Invalid contribution calendar');
+        if (!controller.signal.aborted) setCalendar({
+          contributions: data.contributions,
+          total: data.total?.[String(selectedYear)] ?? data.contributions.reduce((sum, day) => sum + day.count, 0),
+          loading: false,
+          error: false,
+        });
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setCalendar({ contributions: [], total: 0, loading: false, error: true });
+      });
+    return () => controller.abort();
+  }, [hasEntered, selectedYear]);
+
+  const calendarWeeks = buildContributionWeeks(calendar.contributions, selectedYear);
 
   return (
-    <section id="github" className="section githubSection">
+    <section id="github" ref={sectionRef} className="section githubSection">
       <div className="title">
         <div><span>04 —</span><h2>github</h2></div>
         <code>@MARLONARMADO03 <ArrowUpRight /></code>
       </div>
-      <a className="githubGraph reveal" href="https://github.com/marlonarmado03" target="_blank" rel="noreferrer" aria-label="Open Marlon Armado's GitHub profile">
+      <div className="githubGraph reveal">
         <div className="githubCardHead">
           <div className="githubIdentity">
             <span className="githubMark"><Github /></span>
-            <span><b>Marlon Armado</b><small>@marlonarmado03 · developer</small></span>
+            <span><b>{github.profile?.name || 'Marlon Armado'}</b><small>@marlonarmado03 · {github.profile?.bio || 'developer'}</small></span>
           </div>
-          <span className="githubVisit">VISIT PROFILE <ArrowUpRight /></span>
+          <a className="githubVisit" href="https://github.com/marlonarmado03" target="_blank" rel="noreferrer">VISIT PROFILE <ArrowUpRight /></a>
         </div>
-        <div className="githubStatLine"><b>Contribution graph</b><span>Activity preview</span><i>YEAR IN CODE</i></div>
-        <div className="graphContent">
-          <div className="graphMonths" aria-hidden="true"><span>JAN</span><span>FEB</span><span>MAR</span><span>APR</span><span>MAY</span><span>JUN</span><span>JUL</span><span>AUG</span><span>SEP</span><span>OCT</span><span>NOV</span><span>DEC</span></div>
-          <div className="graphBody">
-            <div className="graphWeekdays" aria-hidden="true"><span>MON</span><span>WED</span><span>FRI</span></div>
-            <div className="contributionGrid" aria-hidden="true">
-              {cells.map((level, index) => <i key={index} data-level={level} />)}
+        <div className="githubStats">
+          <div><b>{github.profile?.public_repos ?? '—'}</b><span>PUBLIC REPOSITORIES</span></div>
+          <div><b>{github.profile?.followers ?? '—'}</b><span>FOLLOWERS</span></div>
+          <div><b>{github.profile?.following ?? '—'}</b><span>FOLLOWING</span></div>
+        </div>
+        <div className="githubCalendar">
+          <div className="githubCalendarContent">
+            <div className="githubCalendarHeading">
+              <b>{calendar.loading ? 'Loading contributions…' : calendar.error ? 'Contribution data unavailable' : `${calendar.total.toLocaleString()} contributions in ${selectedYear}`}</b>
+              <span>DAILY ACTIVITY</span>
             </div>
+            {calendar.error ? (
+              <p className="githubMessage">The contribution calendar could not be loaded. <a href="https://github.com/marlonarmado03" target="_blank" rel="noreferrer">View it on GitHub <ArrowUpRight /></a></p>
+            ) : (
+              <div className="githubCalendarScroll" aria-busy={calendar.loading}>
+                <div className={`githubCalendarCanvas${calendar.loading ? ' isLoading' : ''}`} style={{ '--week-count': calendarWeeks.length }}>
+                  <div className="githubMonths" aria-hidden="true">
+                    {getCalendarMonths(selectedYear).map((month) => <span key={month.label} style={{ gridColumnStart: month.week }}>{month.label}</span>)}
+                  </div>
+                  <div className="githubCalendarBody">
+                    <div className="githubWeekdays" aria-hidden="true"><span>Mon</span><span>Wed</span><span>Fri</span></div>
+                    <div className="githubContributionGrid" aria-label={`GitHub contributions by day in ${selectedYear}`}>
+                      {calendarWeeks.flatMap((week, weekIndex) => week.map((day, dayIndex) => day ? (
+                        <i key={day.date} data-level={day.level} title={`${day.count} contributions on ${day.date}`} aria-label={`${day.count} contributions on ${day.date}`} />
+                      ) : <i key={`empty-${weekIndex}-${dayIndex}`} className="emptyDay" aria-hidden="true" />))}
+                    </div>
+                  </div>
+                  <div className="githubCalendarLegend"><span>Learn how we count contributions</span><div><span>Less</span><i data-level="0" /><i data-level="1" /><i data-level="2" /><i data-level="3" /><i data-level="4" /><span>More</span></div></div>
+                </div>
+              </div>
+            )}
+            <small className="githubCalendarSource">Calendar data via <a href="https://github-contributions-api.jogruber.de/" target="_blank" rel="noreferrer">GitHub Contributions API</a></small>
+          </div>
+          <div className="githubYearPicker" aria-label="Choose contribution year">
+            {[currentYear, currentYear - 1].map((year) => (
+              <button key={year} className={selectedYear === year ? 'selected' : ''} onClick={() => setSelectedYear(year)} aria-pressed={selectedYear === year}>{year}</button>
+            ))}
           </div>
         </div>
+        <div className="githubRepoHeading"><b>Recently updated repositories</b><span>LIVE FROM GITHUB</span></div>
+        {github.loading ? (
+          <p className="githubMessage" role="status">Loading public repositories…</p>
+        ) : github.error ? (
+          <p className="githubMessage" role="status">GitHub data is unavailable right now. <a href="https://github.com/marlonarmado03" target="_blank" rel="noreferrer">Open the profile <ArrowUpRight /></a></p>
+        ) : github.repos.length ? (
+          <div className="githubRepos">
+            {github.repos.map((repo) => (
+              <a className="githubRepo" href={repo.html_url} key={repo.id} target="_blank" rel="noreferrer">
+                <span className="githubRepoTop"><b>{repo.name}</b><ArrowUpRight /></span>
+                <span className="githubRepoDescription">{repo.description || 'No description provided.'}</span>
+                <span className="githubRepoMeta">
+                  {repo.language && <i><b />{repo.language}</i>}
+                  <i><span>★</span> {repo.stargazers_count}</i>
+                  <i>UPDATED {new Date(repo.updated_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase()}</i>
+                </span>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <p className="githubMessage">No public repositories to show yet.</p>
+        )}
         <div className="githubGraphBottom">
-          <span className="githubOpenSource"><i /> PUBLIC PROFILE</span>
-          <div className="githubLegend"><span>LESS</span><i data-level="0" /><i data-level="1" /><i data-level="2" /><i data-level="3" /><i data-level="4" /><span>MORE</span></div>
+          <span className="githubOpenSource"><i /> PUBLIC PROFILE DATA</span>
+          {github.profile?.html_url && <span>UPDATED FROM GITHUB API</span>}
         </div>
-      </a>
+      </div>
     </section>
   );
+}
+
+function buildContributionWeeks(contributions, year) {
+  const contributionByDate = new Map(contributions.map((day) => [day.date, day]));
+  const cells = [];
+  const firstDay = new Date(year, 0, 1);
+  for (let padding = 0; padding < firstDay.getDay(); padding += 1) cells.push(null);
+  for (let dayOfYear = 0; dayOfYear < (new Date(year, 1, 29).getMonth() === 1 ? 366 : 365); dayOfYear += 1) {
+    const date = new Date(year, 0, dayOfYear + 1);
+    const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const data = contributionByDate.get(dateKey);
+    cells.push(data ? { ...data, level: Math.min(4, Math.max(0, data.level ?? 0)) } : { date: dateKey, count: 0, level: 0 });
+  }
+  while (cells.length % 7) cells.push(null);
+  const weeks = [];
+  for (let index = 0; index < cells.length; index += 7) weeks.push(cells.slice(index, index + 7));
+  return weeks;
+}
+
+function getCalendarMonths(year) {
+  const offset = new Date(year, 0, 1).getDay();
+  return Array.from({ length: 12 }, (_, month) => ({
+    label: new Date(year, month, 1).toLocaleDateString('en-US', { month: 'short' }),
+    week: Math.floor((offset + new Date(year, month, 1).getDate() - 1) / 7) + 1,
+  }));
 }
 
 function ProjectCard({ project: x, index: i, openLightbox }) {
@@ -701,10 +830,47 @@ function ProjectCard({ project: x, index: i, openLightbox }) {
         <div className="stack">
           {(x.technologies || []).map((t) => <small key={t}>{t}</small>)}
         </div>
+        <details className="caseStudy">
+          <summary>View case study <ChevronRight /></summary>
+          <div className="caseStudyContent">
+            <b>Project scope</b>
+            <p>{x.description}</p>
+            <b>Key workflows</b>
+            <ul>
+              {getProjectHighlights(x).map((highlight) => <li key={highlight}>{highlight}</li>)}
+            </ul>
+            <span>TECH STACK</span>
+            <div className="stack">{(x.technologies || []).map((t) => <small key={t}>{t}</small>)}</div>
+          </div>
+        </details>
         {x.demo_url && <a href={x.demo_url} target="_blank" rel="noreferrer" className="projectLink">Visit site <ArrowUpRight /></a>}
       </div>
     </article>
   );
+}
+
+function getProjectHighlights(project) {
+  const title = project.title.toLowerCase();
+  if (title.includes('human resources')) return [
+    'Employee records, attendance tracking, and leave filing',
+    'HR dashboard with employee count, holidays, notices, and a to-do list',
+    'Secure sign-in with email OTP verification',
+  ];
+  if (title.includes('rental')) return [
+    'Vehicle reservations, trip schedules, and fleet availability',
+    'Customer records and transport dispatch workflows',
+    'Fleet map and booking and income/expense dashboard previews',
+  ];
+  if (title.includes('barangay')) return [
+    'Resident profiles and searchable records',
+    'Certificate and clearance requests with an admin approval queue',
+    'Population dashboard, activity logs, and account notifications',
+  ];
+  if (title.includes('construction')) return [
+    'Company and construction service presentation',
+    'Live website preview and project link',
+  ];
+  return ['Project details and screenshots are available above.'];
 }
 
 /* ------------------------------------------------------------------ */
