@@ -335,8 +335,8 @@ function App() {
         <header className="mobile">
           <button onClick={() => setOpen(true)} aria-label="Open navigation menu" aria-expanded={open} aria-controls="primary-navigation"><Menu /></button>
           <b>MARLON_DB</b>
-          <button onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
-            {theme === 'dark' ? <Sun /> : <Moon />}
+          <button className="mobileThemeToggle" onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+            <span key={theme} className="themeIconSwap">{theme === 'dark' ? <Sun /> : <Moon />}</span>
           </button>
         </header>
         <Home data={data} theme={theme} lookDirection={lookDirection} readyPortraitTheme={readyPortraitTheme} openLightbox={openLightbox} visitorCount={visitorCount} />
@@ -373,6 +373,8 @@ function Sidebar({ open, close, theme, toggle, connected, activeSection, onSelec
 
   useEffect(() => {
     if (!open) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     const sidebar = sidebarRef.current;
     const previousFocus = document.activeElement;
     const focusable = () => [...(sidebar?.querySelectorAll('a[href], button:not([disabled])') || [])];
@@ -395,6 +397,7 @@ function Sidebar({ open, close, theme, toggle, connected, activeSection, onSelec
     }
     document.addEventListener('keydown', onKeyDown);
     return () => {
+      document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', onKeyDown);
       previousFocus?.focus?.();
     };
@@ -422,7 +425,7 @@ function Sidebar({ open, close, theme, toggle, connected, activeSection, onSelec
           <div><b>{connected ? 'DATABASE CONNECTED' : 'LOCAL PREVIEW'}</b><small>postgresql://portfolio</small></div>
         </div>
         <button className="theme" onClick={toggle} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} aria-pressed={theme === 'light'}>
-          {theme === 'dark' ? <Moon /> : <Sun />}
+          <span key={theme} className="themeIconSwap">{theme === 'dark' ? <Moon /> : <Sun />}</span>
           <span>{theme === 'dark' ? 'Dark mode' : 'Light mode'}</span>
         </button>
         <footer>v1.1.0 <span>© 2026</span></footer>
@@ -440,6 +443,17 @@ function Home({ data, theme, lookDirection, readyPortraitTheme, openLightbox, vi
   const p = data.profile;
   const portraitSet = theme === 'light' ? lightPortraits : darkPortraits;
   const neutralPortrait = theme === 'light' ? '/profile-light-800.jpg' : '/profile.png';
+
+  const [skillFilter, setSkillFilter] = useState('All');
+  const skillGroups = [
+    { label: 'Web', matches: ['FRONTEND', 'WEB'] },
+    { label: 'Mobile', matches: ['MOBILE'] },
+    { label: 'Backend', matches: ['BACKEND'] },
+    { label: 'Database', matches: ['DATABASE'] },
+  ];
+  const filteredSkills = skillFilter === 'All'
+    ? data.skills
+    : data.skills.filter((skill) => skillGroups.find((group) => group.label === skillFilter)?.matches.includes(String(skill.category).toUpperCase()));
 
   return (
     <>
@@ -470,7 +484,7 @@ function Home({ data, theme, lookDirection, readyPortraitTheme, openLightbox, vi
               ))}
             </div>
           </div>
-          <div>
+          <div className="heroCopy">
             <div className="record"><span>record.name</span><b>{p.name}</b></div>
             <h1>{p.name}</h1>
             <h2>{p.role}<span> / {p.headline}</span></h2>
@@ -533,8 +547,16 @@ function Home({ data, theme, lookDirection, readyPortraitTheme, openLightbox, vi
       </Section>
 
       <Section id="skills" n="03" title="skills" cmd="SELECT skill, level FROM skills;">
+        <div className="skillFilters" role="group" aria-label="Filter skills by category">
+          {['All', ...skillGroups.map((group) => group.label)].map((category) => (
+            <button key={category} type="button" className={skillFilter === category ? 'active' : ''} onClick={() => setSkillFilter(category)} aria-pressed={skillFilter === category}>
+              {category}
+              <span>{category === 'All' ? data.skills.length : data.skills.filter((skill) => skillGroups.find((group) => group.label === category)?.matches.includes(String(skill.category).toUpperCase())).length}</span>
+            </button>
+          ))}
+        </div>
         <div className="skills">
-          {data.skills.map((x) => (
+          {filteredSkills.map((x) => (
             <div className="skill reveal" key={x.id || x.name}>
               <div><span>{x.category}</span><b>{x.name}</b><small>{x.level}%</small></div>
               <i><em style={{ width: x.level + '%' }} /></i>
@@ -867,9 +889,10 @@ function ProjectCard({ project: x, index: i, openLightbox }) {
       {cover ? (
         <div className="projectGallery">
           <button className="coverBtn" onClick={() => openLightbox(x.title, images, selectedImage)} aria-label={`View ${cover.caption || x.title} full size`}>
-            <img src={cover.src} srcSet={getLocalGalleryImageSet(cover.src)} sizes="(max-width: 700px) calc(100vw - 40px), (max-width: 900px) calc(100vw - 120px), (max-width: 1200px) calc(100vw - 310px), 520px" alt="" loading="lazy" decoding="async" />
+            <img src={cover.src} srcSet={getLocalGalleryImageSet(cover.src)} sizes="(max-width: 700px) calc(100vw - 40px), (max-width: 900px) calc(100vw - 120px), (max-width: 1200px) calc(100vw - 310px), 520px" alt={cover.caption || `${x.title} project screenshot`} loading="lazy" decoding="async" />
             <span className="expand"><Expand /> {images.length > 1 ? 'open gallery' : 'view full size'}</span>
           </button>
+          {cover.caption && <p className="galleryCaption" aria-live="polite">{cover.caption}</p>}
           {images.length > 1 && (
             <div className="galleryControls" role="group" aria-label={`${x.title} image navigation`}>
               <button onClick={() => setSelectedImage((selectedImage - 1 + images.length) % images.length)} aria-label="Show previous image"><ChevronLeft /></button>
@@ -905,7 +928,7 @@ function ProjectCard({ project: x, index: i, openLightbox }) {
           {(x.technologies || []).map((t) => <small key={t}>{t}</small>)}
         </div>
         <details className="caseStudy">
-          <summary>View case study <ChevronRight /></summary>
+          <summary><span>Problem · role · outcome</span><ChevronRight /></summary>
           <div className="caseStudyContent">
             <b>My role</b>
             <p>{caseStudy.role}</p>
@@ -1131,10 +1154,12 @@ function Contact({ email }) {
         <div className="reveal">
           <p className="big">Have a system, website or idea in mind?</p>
           <p>Send a query. I'll get back to you as soon as possible.</p>
-          <a className="email" href={'mailto:' + email}>{email} ↗</a>
+          <a className="email" href={'mailto:' + email}><Mail /> Email Marlon <ArrowUpRight /></a>
+          <a className="emailAddress" href={'mailto:' + email}>{email}</a>
           <a className="cvDownload" href="/marlon-armado-cv.pdf" download="Marlon-Armado-CV.pdf"><Download /> Download my CV</a>
         </div>
         <form onSubmit={submit} className="reveal">
+          <p className="formIntro">Share a few details and I’ll follow up by email.</p>
           {['name', 'email', 'subject'].map((k) => (
             <label key={k}>
               {k}

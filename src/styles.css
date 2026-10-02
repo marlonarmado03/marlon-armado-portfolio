@@ -1,14 +1,17 @@
 :root{
+  color-scheme:dark;
+  transition:background-color .32s ease,color .32s ease;
   --bg:#09090b;--panel:#0d0d10;--panel2:#111115;--text:#dedee3;--muted:#9a9aa4;--faint:#9898a1;
   --line:#25252b;--line2:#19191e;--accent:#f4f4f5;--good:#7bd89b;--shadow:0 18px 45px -20px rgba(0,0,0,.55);
 }
 :root[data-theme=light]{
+  color-scheme:light;
   --bg:#f6f6f3;--panel:#fff;--panel2:#f0f0ec;--text:#17171a;--muted:#55555d;--faint:#6b6b73;
   --line:#d8d8d2;--line2:#e8e8e3;--accent:#111114;--shadow:0 18px 40px -22px rgba(20,20,25,.18);
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;font-size:16px}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;transition:background-color .32s ease,color .32s ease}
 a{color:inherit;text-decoration:none}
 button,input,textarea{font:inherit}
 img{max-width:100%;display:block}
@@ -38,12 +41,15 @@ img{max-width:100%;display:block}
 .conn i{width:7px;height:7px;border-radius:50%;background:var(--good);margin-top:4px;box-shadow:0 0 0 3px color-mix(in srgb, var(--good) 25%, transparent)}
 .conn b{display:block;font:9.5px ui-monospace}
 .conn small{display:block;color:var(--faint);font:9px ui-monospace;margin-top:4px}
-.theme{display:flex;align-items:center;gap:8px;min-height:44px;border:0;background:none;color:var(--muted);padding:12px 7px;text-align:left;cursor:pointer;border-radius:3px;transition:background .15s,color .15s}
+.theme{display:flex;align-items:center;gap:8px;min-height:44px;border:0;background:none;color:var(--muted);padding:12px 7px;text-align:left;cursor:pointer;border-radius:3px;transition:background .2s ease,color .2s ease}
 .theme:hover{background:var(--panel2);color:var(--text)}
-.theme svg{width:15px}
+.theme svg{width:15px;transition:transform .3s ease,color .2s ease}
+.theme:hover svg{transform:rotate(-14deg) scale(1.08)}
+.themeIconSwap{display:inline-flex;align-items:center;justify-content:center;animation:themeIconIn .28s ease both}
+@keyframes themeIconIn{from{opacity:0;transform:rotate(-35deg) scale(.72)}to{opacity:1;transform:rotate(0) scale(1)}}
 .theme span{font:11.5px ui-monospace}
 .app aside footer{color:var(--faint);font:9px ui-monospace;padding:10px 7px 0;display:flex;justify-content:space-between}
-.app main{margin-left:252px;min-height:100vh;background-image:radial-gradient(var(--line2) .7px,transparent .7px);background-size:13px 13px}
+.app main{margin-left:252px;min-height:100vh;background-color:var(--bg);background-image:radial-gradient(var(--line2) .7px,transparent .7px);background-size:13px 13px;transition:background-color .32s ease}
 .mobile{display:none}
 
 /* ---------- sections ---------- */
@@ -51,6 +57,7 @@ img{max-width:100%;display:block}
 .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
 .reveal.in-view{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+@media (prefers-reduced-motion:reduce){:root,body,.app aside,.app main,.theme,.theme svg,.themeIconSwap{transition:none!important;animation:none!important}}
 
 .hero{min-height:100vh;padding-top:124px}
 .eyebrow{font:10.5px ui-monospace;color:var(--muted);letter-spacing:.1em;margin-bottom:35px}
@@ -655,3 +662,63 @@ h1{background:linear-gradient(105deg,var(--text) 48%,var(--good));-webkit-backgr
 }
 @media(hover:none){.coverBtn .expand{opacity:1;transform:none}}
 .theme:focus-visible,.app nav a:focus-visible,.galleryControls button:focus-visible,.thumbBtn:focus-visible,.chatToggle:focus-visible{outline:3px solid var(--good);outline-offset:3px}
+
+/* ---------- recruiter-focused polish ---------- */
+.heroCopy h1{color:var(--text);text-shadow:0 10px 38px color-mix(in srgb,var(--good) 12%,transparent)}
+.heroCopy h2{margin-bottom:18px}
+.heroCopy h2 span{color:var(--good)}
+.heroCopy .record b{color:var(--good)}
+.heroCopy .primaryAction{min-height:50px;padding-inline:22px}
+.heroCopy .secondaryAction,.heroCopy .cvAction{min-height:50px}
+.heroMeta>div{min-width:0}
+.projectCard{border-radius:10px;overflow:hidden}
+.projectGallery{display:flex;flex-direction:column}
+.projectGallery .coverBtn{flex:none}
+.galleryCaption{min-height:36px;margin:0;padding:9px 13px;background:var(--panel);color:var(--muted);font:10px/1.5 ui-monospace;letter-spacing:.01em}
+.galleryControls{border-top:1px solid var(--line)}
+.galleryControls button{border:1px solid transparent}
+.galleryControls button:hover{border-color:color-mix(in srgb,var(--good) 32%,var(--line));background:var(--glow)}
+.thumbBtn{width:72px;height:50px}
+.caseStudy{border:1px solid var(--line);border-radius:8px;padding:0;background:color-mix(in srgb,var(--panel) 78%,transparent);overflow:hidden}
+.caseStudy summary{min-height:44px;padding:0 12px}
+.caseStudy[open] summary{border-bottom:1px solid var(--line);background:var(--glow)}
+.caseStudyContent{margin:0;padding:14px;border:0;border-radius:0;background:transparent}
+.caseStudyContent>b{color:var(--good)}
+.projectLink{align-self:flex-start;display:inline-flex;align-items:center;gap:7px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--good) 32%,var(--line));border-radius:6px;color:var(--good);font:10px ui-monospace;transition:background .18s,transform .18s}
+.projectLink:hover{transform:translateY(-2px);background:var(--glow)}
+.skillFilters{display:flex;flex-wrap:wrap;gap:8px;margin:-12px 0 28px}
+.skillFilters button{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:0 13px;border:1px solid var(--line);border-radius:99px;background:var(--panel);color:var(--muted);font:11px ui-monospace;cursor:pointer;transition:color .18s,border-color .18s,background .18s,transform .18s}
+.skillFilters button:hover{transform:translateY(-1px);border-color:var(--good);color:var(--text)}
+.skillFilters button.active{border-color:var(--good);background:var(--glow);color:var(--good)}
+.skillFilters button span{display:grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:var(--panel2);font-size:9px}
+.skill{padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--panel);transition:border-color .18s,transform .18s,background .18s}
+.skill:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--good) 40%,var(--line));background:color-mix(in srgb,var(--panel) 85%,var(--good))}
+.skills{gap:14px}
+.contact .email{display:inline-flex;align-items:center;gap:8px;margin-top:24px;padding:12px 15px;border:1px solid var(--good);border-radius:6px;background:var(--good);color:#101813;font:600 11px ui-monospace;transition:transform .18s,box-shadow .18s}
+.contact .email:hover{transform:translateY(-2px);box-shadow:0 10px 25px -14px var(--good)}
+.contact .email svg{width:15px;height:15px}
+.emailAddress{display:block;width:max-content;max-width:100%;margin-top:11px;color:var(--muted);font:11px ui-monospace;overflow-wrap:anywhere}
+.emailAddress:hover{color:var(--good)}
+.formIntro{margin:0 0 2px;color:var(--muted);font-size:13px;line-height:1.6}
+.contact form button{min-height:48px;padding-inline:18px}
+.app nav a,.projectCard,.skill,.services article,.contact form,.cvDownload,.projectLink{border-radius:8px}
+.app nav a{min-height:46px}
+.app nav a:focus-visible,.mobile button:focus-visible,.x:focus-visible,.skillFilters button:focus-visible,.projectLink:focus-visible,.email:focus-visible,.emailAddress:focus-visible{outline:3px solid var(--good);outline-offset:3px}
+@media(max-width:900px){
+  .app aside{max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;padding-top:max(20px,env(safe-area-inset-top));padding-bottom:max(20px,env(safe-area-inset-bottom))}
+  .app aside nav{gap:5px}
+  .app aside nav a{min-height:48px}
+  .mobile{padding-inline:max(16px,env(safe-area-inset-left)) max(16px,env(safe-area-inset-right))}
+}
+@media(max-width:700px){
+  .heroCopy .heroActions a{flex:1 1 calc(50% - 8px);min-height:48px}
+  .heroCopy .heroActions .primaryAction{flex-basis:100%}
+  .skillFilters{gap:7px;margin-bottom:22px}
+  .skillFilters button{min-height:44px;padding-inline:11px}
+  .skills{gap:10px}
+  .galleryCaption{min-height:42px;padding:10px 12px}
+  .thumbBtn{width:68px;height:48px}
+  .contact .email{min-height:48px}
+  .emailAddress{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){.skillFilters button,.skill,.projectLink,.contact .email{transition:none}}
