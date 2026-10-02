@@ -1,7 +1,7 @@
 ﻿import React, { useEffect, useState, useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 import {
-  Activity, ArrowUpRight, BriefcaseBusiness, Check, ChevronLeft, ChevronRight,
+  Activity, ArrowUpRight, BriefcaseBusiness, Check, ChevronLeft, ChevronRight, Download,
   Code2, Database, Expand, Github, Globe2, Mail, Menu, MessageCircle, Moon, Send, Server, Sun,
   Terminal, X, Zap
 } from 'lucide-react';
@@ -97,7 +97,7 @@ const demo = {
       company: 'Professional Development',
       position: 'Web and Mobile Developer',
       start_date: '2022-01-01',
-      description: 'Building responsive websites and cross-platform mobile applications, with a focus on functional, user-friendly and maintainable digital solutions.',
+      description: 'Managing and enhancing systems, developing web and mobile applications, and managing MySQL databases.',
     },
   ],
 
@@ -483,6 +483,7 @@ function Home({ data, theme, lookDirection, readyPortraitTheme, openLightbox, vi
             <div className="heroActions">
               <a className="primaryAction" href="#projects">Explore my work <ArrowUpRight /></a>
               <a className="secondaryAction" href="#contact">Let’s talk <Mail /></a>
+              <a className="cvAction" href="/marlon-armado-cv.pdf" download="Marlon-Armado-CV.pdf"><Download /> Download CV</a>
             </div>
             <div className="heroMeta">
               <div><span>LOCATION</span><b>{p.location}</b></div>
@@ -859,6 +860,7 @@ function ProjectCard({ project: x, index: i, openLightbox }) {
   const [selectedImage, setSelectedImage] = useState(0);
   const images = normalizeGallery(x.images) || (x.image_url ? [{ src: x.image_url, caption: '' }] : []);
   const cover = images[selectedImage];
+  const caseStudy = getProjectCaseStudy(x);
 
   return (
     <article className="projectCard reveal">
@@ -905,11 +907,15 @@ function ProjectCard({ project: x, index: i, openLightbox }) {
         <details className="caseStudy">
           <summary>View case study <ChevronRight /></summary>
           <div className="caseStudyContent">
-            <b>Project scope</b>
-            <p>{x.description}</p>
+            <b>My role</b>
+            <p>{caseStudy.role}</p>
+            <b>Challenge addressed</b>
+            <p>{caseStudy.challenge}</p>
+            <b>Outcome</b>
+            <p>{caseStudy.outcome}</p>
             <b>Key workflows</b>
             <ul>
-              {getProjectHighlights(x).map((highlight) => <li key={highlight}>{highlight}</li>)}
+              {caseStudy.highlights.map((highlight) => <li key={highlight}>{highlight}</li>)}
             </ul>
             <span>TECH STACK</span>
             <div className="stack">{(x.technologies || []).map((t) => <small key={t}>{t}</small>)}</div>
@@ -921,28 +927,38 @@ function ProjectCard({ project: x, index: i, openLightbox }) {
   );
 }
 
-function getProjectHighlights(project) {
+function getProjectCaseStudy(project) {
   const title = project.title.toLowerCase();
-  if (title.includes('human resources')) return [
-    'Employee records, attendance tracking, and leave filing',
-    'HR dashboard with employee count, holidays, notices, and a to-do list',
-    'Secure sign-in with email OTP verification',
-  ];
-  if (title.includes('rental')) return [
-    'Vehicle reservations, trip schedules, and fleet availability',
-    'Customer records and transport dispatch workflows',
-    'Fleet map and booking and income/expense dashboard previews',
-  ];
-  if (title.includes('barangay')) return [
-    'Resident profiles and searchable records',
-    'Certificate and clearance requests with an admin approval queue',
-    'Population dashboard, activity logs, and account notifications',
-  ];
-  if (title.includes('construction')) return [
-    'Company and construction service presentation',
-    'Live website preview and project link',
-  ];
-  return ['Project details and screenshots are available above.'];
+  if (title.includes('human resources')) return {
+    role: 'Managed system enhancements, developed web functionality, and managed the MySQL database.',
+    challenge: 'Employee records, attendance, leave requests, and HR updates needed organized workflows in one system.',
+    outcome: 'A centralized HR system with employee records, attendance and leave workflows, reporting, and OTP-protected sign-in.',
+    highlights: ['Employee records, attendance tracking, and leave filing', 'HR dashboard with employee count, holidays, notices, and a to-do list', 'Secure sign-in with email OTP verification'],
+  };
+  if (title.includes('rental')) return {
+    role: 'Managed system enhancements, developed web functionality, and managed the MySQL database.',
+    challenge: 'Vehicle bookings, trip schedules, fleet availability, customer records, and dispatch needed a coordinated workflow.',
+    outcome: 'A rental and transport system that brings booking, fleet, customer, and dispatch workflows together with dashboard and map views.',
+    highlights: ['Vehicle reservations, trip schedules, and fleet availability', 'Customer records and transport dispatch workflows', 'Fleet map and booking and income/expense dashboard views'],
+  };
+  if (title.includes('barangay')) return {
+    role: 'Managed system enhancements, developed web functionality, and managed the MySQL database.',
+    challenge: 'Resident records and community service requests needed searchable records and a clear review and approval flow.',
+    outcome: 'A barangay management system for resident profiles, certificate and clearance requests, approvals, and reporting.',
+    highlights: ['Resident profiles and searchable records', 'Certificate and clearance requests with an admin approval queue', 'Population dashboard, activity logs, and account notifications'],
+  };
+  if (title.includes('construction')) return {
+    role: 'Developed and enhanced the company website.',
+    challenge: 'The company needed a public website to introduce its business and construction services.',
+    outcome: 'A live website presenting the company and its construction services.',
+    highlights: ['Company and construction service presentation', 'Live website preview and project link'],
+  };
+  return {
+    role: 'Managed system enhancements, developed web and mobile applications, and managed MySQL databases.',
+    challenge: project.description,
+    outcome: 'Delivered the project scope and workflows shown in the portfolio.',
+    highlights: ['Project details and screenshots are available above.'],
+  };
 }
 
 /* ------------------------------------------------------------------ */
@@ -1116,6 +1132,7 @@ function Contact({ email }) {
           <p className="big">Have a system, website or idea in mind?</p>
           <p>Send a query. I'll get back to you as soon as possible.</p>
           <a className="email" href={'mailto:' + email}>{email} ↗</a>
+          <a className="cvDownload" href="/marlon-armado-cv.pdf" download="Marlon-Armado-CV.pdf"><Download /> Download my CV</a>
         </div>
         <form onSubmit={submit} className="reveal">
           {['name', 'email', 'subject'].map((k) => (

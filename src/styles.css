@@ -422,6 +422,11 @@ h1{background:linear-gradient(105deg,var(--text) 48%,var(--good));-webkit-backgr
 .heroActions{margin:30px 0 17px}
 .heroActions a{border-radius:6px;padding-inline:19px}
 .primaryAction{box-shadow:0 8px 24px -12px var(--good)}
+.cvAction{border:1px solid color-mix(in srgb,var(--good) 38%,var(--line));background:color-mix(in srgb,var(--good) 8%,var(--panel));color:var(--text)}
+.cvAction:hover{border-color:var(--good);background:var(--glow)}
+.cvAction svg,.cvDownload svg{width:15px;height:15px;color:var(--good)}
+.cvDownload{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;margin-top:26px;padding:0 16px;border:1px solid color-mix(in srgb,var(--good) 42%,var(--line));border-radius:6px;background:var(--panel);color:var(--text);font:11px ui-monospace;transition:border-color .18s,background .18s,transform .18s}
+.cvDownload:hover{transform:translateY(-2px);border-color:var(--good);background:var(--glow)}
 .links{gap:16px}
 .links a{border-bottom:0;opacity:.8}
 .links a:hover{color:var(--good);opacity:1}
